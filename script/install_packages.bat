@@ -1,10 +1,10 @@
 @echo off
-call etwenv\Scripts\activate.bat
+call env\Scripts\activate.bat
 pip install -r requirements.txt
 
 echo Done.
 
-call etwenv\Scripts\deactivate.bat
+call env\Scripts\deactivate.bat
 echo Done > "exist.txt"
 cd ..\
 call run.bat
