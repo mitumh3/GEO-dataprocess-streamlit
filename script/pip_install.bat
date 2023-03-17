@@ -15,4 +15,5 @@ if %errorlevel% equ 0 (
     REM Clean up
     del get-pip.py
 )
+timeout /t 5 >nul
 call virtualenv_install.bat

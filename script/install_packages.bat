@@ -5,6 +5,7 @@ pip install -r requirements.txt
 echo Done.
 
 call env\Scripts\deactivate.bat
-echo Done > "exist.txt"
+echo Done > "setup-done.txt"
 cd ..\
+cls
 call run.bat

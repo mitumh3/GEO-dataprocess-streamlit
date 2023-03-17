@@ -5,7 +5,6 @@ if %errorlevel% neq 0 (
     echo Installing virtualenv package...
     pip install virtualenv==20.19.0
 )
-cls
 python -m virtualenv env
 :: install packages script
 call install_packages.bat

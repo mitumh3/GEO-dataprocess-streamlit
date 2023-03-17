@@ -107,7 +107,7 @@ def main():
     if "show_secondary" not in st.session_state:
         st.session_state.show_secondary = False
     if not st.session_state.show_secondary:
-        st.button("Export files", on_click=on_main_click)
+        st.button("Export files", on_click=on_main_click, args=(exp_data, general_info, clin_data))
     if st.session_state.show_secondary:
         # if os.path.exists(file_path + "_clinical"):
         st.warning(
@@ -115,7 +115,7 @@ def main():
         )
         col1, col2 = st.columns(2)
         with col1:
-            st.button("Yes", on_click=on_yes_click)
+            st.button("Yes", on_click=on_yes_click, args=(exp_data, general_info, clin_data))
         with col2:
             st.button("No", on_click=on_no_click)
 
