@@ -1,5 +1,6 @@
 import os
 import re
+import asyncio
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -7,24 +8,24 @@ from dotenv import load_dotenv
 from helper import *
 from process_func import *
 
+load_dotenv()
+dataset_path = os.getenv("dataset_path")
 
-def main():
-    load_dotenv()
-    dataset_path = os.getenv("dataset_path")
+async def main():
     # Add title
     st.set_page_config(page_title="Process Data")
     st.session_state.initial = st.session_state
     # List of available datasets in folder
-    if not os.path.exists(dataset_path):
-        os.mkdir(dataset_path)
-
-    st.session_state.available_datasets = set(
-        word
-        for file in os.listdir(dataset_path)
-        if file.endswith("_series_matrix.txt.gz")
-        for word in re.findall(r"[^\W_]+", file)
-        if word.startswith("GSE")
-    )
+    try:
+        available_datasets = set(
+            word
+            for file in os.listdir(dataset_path)
+            if file.endswith("_series_matrix.txt.gz")
+            for word in re.findall(r"[^\W_]+", file)
+            if word.startswith("GSE")
+        )
+    except: available_datasets = ""
+    st.session_state.available_datasets = available_datasets
     avail_datasets = (
         " | ".join(str(item) for item in st.session_state.available_datasets)
         if st.session_state.available_datasets
@@ -55,7 +56,7 @@ def main():
         # Bind 3 main dataframes to variables
         if st.session_state.processed == False:
             with st.spinner("Processing..."):
-                exp_data, general_info, clin_data, data_extra, warn = get_data(geoID)
+                exp_data, general_info, clin_data, data_extra, warn = await get_data(geoID)
                 st.session_state.exp_data = exp_data
                 st.session_state.general_info = general_info
                 st.session_state.clin_data = clin_data
@@ -69,8 +70,8 @@ def main():
         warn = st.session_state.warn
         data_extra = st.session_state.extra
 
-        # Display unused files select radio
-        display_extra(data_extra, exp_data, clin_data)
+        # Display unused files with select radio
+        handle_extra(data_extra, exp_data, clin_data)
 
         # Display data
         num_rows1, num_cols1 = exp_data.shape
@@ -107,7 +108,7 @@ def main():
     if "show_secondary" not in st.session_state:
         st.session_state.show_secondary = False
     if not st.session_state.show_secondary:
-        st.button("Export files", on_click=on_main_click, args=(exp_data, general_info, clin_data))
+        st.button("Export files", on_click=on_main_click, args=(exp_data, general_info, clin_data, geoID))
     if st.session_state.show_secondary:
         # if os.path.exists(file_path + "_clinical"):
         st.warning(
@@ -115,10 +116,10 @@ def main():
         )
         col1, col2 = st.columns(2)
         with col1:
-            st.button("Yes", on_click=on_yes_click, args=(exp_data, general_info, clin_data))
+            st.button("Yes", on_click=on_yes_click, args=(exp_data, general_info, clin_data, geoID))
         with col2:
             st.button("No", on_click=on_no_click)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

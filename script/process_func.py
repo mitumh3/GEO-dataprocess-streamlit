@@ -1,27 +1,29 @@
 import gzip
 import ssl
 import urllib.request
-
+import asyncio
 import numpy as np
 import pandas as pd
 import streamlit as st
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from GEOparse import utils as GEO
+import os
 
 load_dotenv()
+dataset_path = os.getenv("dataset_path")
+result_path = os.getenv("result_path")
 
-
-def get_data(accession_ID):
+async def get_data(accession_ID):
     # Set Accession ID and folder path for saving files
     context = ssl._create_unverified_context()
-    url1 = "https://ftp.ncbi.nlm.nih.gov/geo/series/" + accession_ID[:-3] + "nnn/" + accession_ID + "/"
-    folderpath = "../dataset/"
+    url1 = f"https://ftp.ncbi.nlm.nih.gov/geo/series/{accession_ID[:-3]}nnn/{accession_ID}/"
     geo_folders = ["matrix/", "miniml/", "soft/", "suppl/"]
     filelist = {}
+    GEO.mkdir_p(dataset_path)
 
     for file_prefix in geo_folders:
-        url2 = url1 + file_prefix
+        url2 = f"{url1}/{file_prefix}"
 
         # Find all links in the HTML content
         links = BeautifulSoup(urllib.request.urlopen(url2, context=context).read(), "html.parser").find_all("a")
@@ -29,35 +31,44 @@ def get_data(accession_ID):
         # Print the file names
         for link in links:
             file_name = link.get("href")
-            if file_name.endswith(".txt.gz") or file_name.endswith(".tsv.gz") or file_name.endswith(".csv.gz"):
+            if (file_name.endswith(".txt.gz") 
+                    or file_name.endswith(".tsv.gz") 
+                    or file_name.endswith(".csv.gz")):
                 filelist[file_name] = file_prefix
+
+    loop = asyncio.get_event_loop()
+    coros = []
+    for file_name, file_prefix in filelist.items():
+        # Down file and process
+        coro = process(url1, file_name, file_prefix, loop) 
+        coros.append(coro)
+    data_lst = await asyncio.gather(*coros)
+    # loop.close()
 
     expression_data = pd.DataFrame()
     gereral_data = {}
-    clinical_series = pd.DataFrame()
+    clinical = pd.DataFrame()
     data_extra = {}
-    for file_name, file_prefix in filelist.items():
-        print("\n", file_name)
-        data = process(url1, folderpath, file_name, file_prefix)
-
+    for data in data_lst:
+        # Handle data
         if "type" in data:
             try:
                 exp = data["expression"].T
                 exp = exp.set_axis(exp.iloc[0], axis=1).iloc[1:]
             except:
                 exp = pd.DataFrame()
-
             gen = data["general"]
+            # Add elements in data to existing expression, general and clinical
             for feature, info in gen.items():
                 if feature not in gereral_data:
                     gereral_data[feature] = info
 
             expression_data = pd.concat([expression_data, exp])
             gereral_data = pd.DataFrame(gereral_data)
-            clinical_series = pd.concat([clinical_series, data["clinical"]]).reset_index(drop=True)
+            clinical = pd.concat([clinical, data["clinical"]]).reset_index(drop=True)
         else:
-            data_extra[file_name] = data
-    clinical = clinical_series
+            # Unused files
+            data_extra[data["filename"]] = data["extra"]
 
     expression_data = expression_data.T.reset_index()
     for i in [expression_data, gereral_data, clinical]:
@@ -68,14 +79,15 @@ def get_data(accession_ID):
     warn = check_dataframe_integrity(clinical)
     return expression_data, gereral_data, clinical, data_extra, warn
 
-
-def process(url1, folderpath, file_name, file_prefix):
-    url = url1 + file_prefix + file_name
-    filepath = folderpath + file_name
-    # Download files
-    GEO.mkdir_p(folderpath)
+def download_file(url, filepath):
     GEO.download_from_url(url, destination_path=filepath)
 
+
+async def process(url1, file_name, file_prefix, loop):
+    url = f"{url1}{file_prefix}{file_name}"
+    filepath = f"{dataset_path}/{file_name}"
+    # Download files 
+    await loop.run_in_executor(None, download_file, url, filepath)
     # Read files
     with gzip.open(filepath, "rt") as f:
         largest_column_count = max(len(line.split("\t")) for line in f)
@@ -97,7 +109,7 @@ def process(url1, folderpath, file_name, file_prefix):
 
     check1 = df[df[0].str.contains("!series_matrix_table", na=False)]
     if check1.empty:
-        data = process_extra(df)
+        data = {"filename":file_name, "extra":process_extra(df)}
     else:
         data = process_series_matrix(df)
     return data
@@ -252,34 +264,6 @@ def check_dataframe_integrity(df):
         print("No integrity issues found in DataFrame")
     else:
         return warn
-
-
-def display_extra(data_extra, exp_data, clin_data):
-    n_data_extra = len(data_extra)
-    if n_data_extra != 0:
-        st.subheader("Unused files")
-        with st.form("data_extra_form"):
-            columns = st.columns(n_data_extra)
-            options = ["Expression data", "Clinical data", "None"]
-            for i, col in enumerate(columns):
-                file_name = list(data_extra)[i]
-                with col:
-                    st.write(file_name)
-                    st.radio("Select options", options, key=file_name)
-                    num_rows, num_cols = data_extra[file_name].shape
-                    st.write(num_rows, " x ", num_cols)
-                    st.write(data_extra[file_name].head())
-            submit_button_extra = st.form_submit_button(label="Submit choice")
-        if submit_button_extra:
-            st.session_state.button_extra = True
-        if not st.session_state.button_extra:
-            st.write("Submit to add unused data to the chosen data")
-
-        #     # Action when submit button is clicked
-        else:
-            # st.write(data_extra)
-            merge_data(data_extra, exp_data, clin_data)
-            st.experimental_rerun()
 
 
 def merge_data(data_extra, exp_data, clin_data):
