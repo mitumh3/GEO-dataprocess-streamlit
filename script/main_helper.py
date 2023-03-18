@@ -1,14 +1,43 @@
 import asyncio
 import os
-
+import re
 import streamlit as st
 from dotenv import load_dotenv
 
-from process_func import merge_data
+from process_func import merge_data, get_data
 
 load_dotenv()
 RESULT_PATH = os.getenv("result_path")
+DATASET_PATH = os.getenv("dataset_path")
 
+def get_available_datasets():
+    try:
+        available_datasets = set(
+            word
+            for file in os.listdir(DATASET_PATH)
+            if file.endswith("_series_matrix.txt.gz")
+            for word in re.findall(r"[^\W_]+", file)
+            if word.startswith("GSE")
+        )
+    except BaseException:
+        available_datasets = ""
+    st.session_state.available_datasets = available_datasets
+    dataset_list = (
+        " | ".join(str(item) for item in st.session_state.available_datasets)
+        if st.session_state.available_datasets
+        else None
+    )
+    return dataset_list
+
+
+def run_process(geo_id):
+    exp_data, general_info, clin_data, data_extra, warn = asyncio.run(get_data(geo_id))
+    st.session_state.exp_data = exp_data
+    st.session_state.general_info = general_info
+    st.session_state.clin_data = clin_data
+    st.session_state.warn = warn
+    st.session_state.extra = data_extra
+    st.session_state.processed = True
 
 async def save_csv(data, path, message):
     try:
