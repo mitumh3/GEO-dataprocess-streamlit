@@ -1,5 +1,6 @@
 import streamlit as st
 
+# Function to create submit button for ACCESSION ID input
 def submit_geo_id(dataset_list):
     with st.form("GEO_form"):
         geo_id = st.text_input("Enter GEO Accession ID here:")
@@ -9,8 +10,8 @@ def submit_geo_id(dataset_list):
     return geo_id, submit_button_geo
 
 
-
-def display_data(exp_data, general_info, clin_data, warn):
+# Function to display data
+def display_data(exp_data, general_info, clin_data):
     num_rows1, num_cols1 = exp_data.shape
     num_rows2 = general_info.shape[0]
     num_rows3, num_cols3 = clin_data.shape
@@ -28,6 +29,7 @@ def display_data(exp_data, general_info, clin_data, warn):
     return st.form("clin_data_form"), clin_data
 
 
+# Function to display column selection
 def display_column_selection(form, clin_data, warn):
     with form:
         feature_selection = st.multiselect("Choose columns to filter and submit", clin_data.columns)

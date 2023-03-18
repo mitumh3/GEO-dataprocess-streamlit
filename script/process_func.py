@@ -12,6 +12,7 @@ load_dotenv()
 DATASET_PATH = os.getenv("dataset_path")
 
 
+# Main function to get data with a ACCESSION ID input
 async def get_data(accession_id):
     # Set Accession ID and folder path for saving files
     url_prefix, filelist = get_file_list(accession_id)
@@ -61,6 +62,7 @@ async def get_data(accession_id):
     return expression_data, gereral_data, clinical, data_extra, warn
 
 
+# Main function to process data
 async def process(url1, file_name, file_prefix, loop):
     url = f"{url1}{file_prefix}{file_name}"
     filepath = f"{DATASET_PATH}/{file_name}"
@@ -93,7 +95,7 @@ async def process(url1, file_name, file_prefix, loop):
     return data
 
 
-# Main function that calls the other functions to process input dataframe
+# Main function to process input dataframe recognised as series matrix file
 def process_series_matrix(df):
     data = {}
     data.update(extract_expression_data(df))
@@ -101,6 +103,7 @@ def process_series_matrix(df):
     return data
 
 
+# Main function to process input dataframe not recognised as series matrix file
 def process_extra(df_extra):
     # Set first row as column names
     df_extra.columns = df_extra.iloc[0]
@@ -108,6 +111,7 @@ def process_extra(df_extra):
     return data
 
 
+# Function to merge unused file with existing data - expression data or clinical data
 def merge_data(data_extra, exp_data, clin_data):
     for i in range(len(data_extra)):
         file_name = list(data_extra)[0]

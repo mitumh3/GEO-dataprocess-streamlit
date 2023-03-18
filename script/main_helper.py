@@ -10,6 +10,8 @@ load_dotenv()
 RESULT_PATH = os.getenv("result_path")
 DATASET_PATH = os.getenv("dataset_path")
 
+
+# Func to get existing datasets
 def get_available_datasets():
     try:
         available_datasets = set(
@@ -30,6 +32,7 @@ def get_available_datasets():
     return dataset_list
 
 
+# Func to initiate processing data
 def run_process(geo_id):
     exp_data, general_info, clin_data, data_extra, warn = asyncio.run(get_data(geo_id))
     st.session_state.exp_data = exp_data
@@ -39,6 +42,8 @@ def run_process(geo_id):
     st.session_state.extra = data_extra
     st.session_state.processed = True
 
+
+# Func to save files to csv
 async def save_csv(data, path, message):
     try:
         data.to_csv(path, index=False)
@@ -47,6 +52,7 @@ async def save_csv(data, path, message):
         st.write(f"Error: {e}")
 
 
+# Func to export data
 async def export(exp_data, general_info, clin_data, geo_id):
     folder_path = f"{RESULT_PATH}/{geo_id}"
     file_path = f"{folder_path}/{geo_id}"
@@ -65,6 +71,7 @@ async def export(exp_data, general_info, clin_data, geo_id):
         st.success("Files exported!")
 
 
+# Func to handle export click
 def on_main_click(exp_data, general_info, clin_data, geo_id):
     folder_path = f"{RESULT_PATH}/{geo_id}"
     if not os.path.exists(folder_path):
@@ -74,15 +81,18 @@ def on_main_click(exp_data, general_info, clin_data, geo_id):
         st.session_state.show_secondary = True
 
 
+# Func to handle yes click of export
 def on_yes_click(exp_data, general_info, clin_data, geo_id):
     st.session_state.show_secondary = False
     asyncio.run(export(exp_data, general_info, clin_data, geo_id))
 
 
+# Func to handle no click of export
 def on_no_click():
     st.session_state.show_secondary = False
 
 
+# Func to handle and display unused files
 def handle_extra(data_extra, exp_data, clin_data):
     n_data_extra = len(data_extra)
     if n_data_extra != 0:

@@ -39,7 +39,7 @@ def main():
         # Display unused files with select radio
         handle_extra(data_extra, exp_data, clin_data)
 
-        form, clin_data = display_data(exp_data, general_info, clin_data, warn)
+        form, clin_data = display_data(exp_data, general_info, clin_data)
         display_column_selection(form, clin_data, warn)
 
     # # Submit button for exporting files

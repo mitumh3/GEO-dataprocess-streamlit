@@ -10,7 +10,7 @@ from GEOparse import utils as GEO
 DATASET_PATH = os.getenv("dataset_path")
 
 
-# Function to get file list from FTP server
+# Function to get file list of GEO from FTP server
 def get_file_list(accession_id):
     context = ssl._create_unverified_context()
     url_prefix = f"https://ftp.ncbi.nlm.nih.gov/geo/series/{accession_id[:-3]}nnn/{accession_id}/"
@@ -140,6 +140,7 @@ def split_values(data):
     return new_data
 
 
+# Function to check dataframe integrity
 def check_dataframe_integrity(df):
     """Check for various integrity issues in a pandas DataFrame."""
     issues_found = False
