@@ -5,8 +5,10 @@ import urllib.request
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from GEOparse import utils as GEO
 
+load_dotenv()
 DATASET_PATH = os.getenv("dataset_path")
 
 

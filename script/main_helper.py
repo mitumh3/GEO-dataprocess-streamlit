@@ -1,10 +1,11 @@
 import asyncio
 import os
 import re
+
 import streamlit as st
 from dotenv import load_dotenv
 
-from process_func import merge_data, get_data
+from process_func import get_data, merge_data
 
 load_dotenv()
 RESULT_PATH = os.getenv("result_path")
