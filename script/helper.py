@@ -1,12 +1,14 @@
+import asyncio
 import os
 
 import streamlit as st
 from dotenv import load_dotenv
-from process_func import *
-load_dotenv()
 
-dataset_path = os.getenv("dataset_path")
-result_path = os.getenv("result_path")
+from process_func import merge_data
+
+load_dotenv()
+RESULT_PATH = os.getenv("result_path")
+
 
 async def save_csv(data, path, message):
     try:
@@ -16,36 +18,36 @@ async def save_csv(data, path, message):
         st.write(f"Error: {e}")
 
 
-async def export(exp_data, general_info, clin_data, geoID):
-    folder_path = f"{result_path}/{geoID}"
-    file_path = f"{folder_path}/{geoID}"
+async def export(exp_data, general_info, clin_data, geo_id):
+    folder_path = f"{RESULT_PATH}/{geo_id}"
+    file_path = f"{folder_path}/{geo_id}"
     with st.spinner("Exporting..."):
         if not os.path.exists("../processed_data/"):
             print("\nFolder 'processed_data' created")
             os.mkdir("../processed_data/")
         if not os.path.exists(folder_path):
-            print("\nFolder ", geoID, " created")
+            print("\nFolder ", geo_id, " created")
             os.mkdir(folder_path)
         await asyncio.gather(
-                    save_csv(exp_data, f"{file_path}_expression.csv", "expression data"),
-                    save_csv(general_info, f"{file_path}_generalinfo.csv", "general info"),
-                    save_csv(clin_data, f"{file_path}_clinical.csv", "clinical data")
-                )
+            save_csv(exp_data, f"{file_path}_expression.csv", "expression data"),
+            save_csv(general_info, f"{file_path}_generalinfo.csv", "general info"),
+            save_csv(clin_data, f"{file_path}_clinical.csv", "clinical data"),
+        )
         st.success("Files exported!")
 
 
-def on_main_click(exp_data, general_info, clin_data, geoID):
-    folder_path = f"{result_path}/{geoID}"
+def on_main_click(exp_data, general_info, clin_data, geo_id):
+    folder_path = f"{RESULT_PATH}/{geo_id}"
     if not os.path.exists(folder_path):
         st.session_state.show_secondary = False
-        asyncio.run(export(exp_data, general_info, clin_data, geoID))
+        asyncio.run(export(exp_data, general_info, clin_data, geo_id))
     else:
         st.session_state.show_secondary = True
 
 
-def on_yes_click(exp_data, general_info, clin_data, geoID):
+def on_yes_click(exp_data, general_info, clin_data, geo_id):
     st.session_state.show_secondary = False
-    asyncio.run(export(exp_data, general_info, clin_data, geoID))
+    asyncio.run(export(exp_data, general_info, clin_data, geo_id))
 
 
 def on_no_click():

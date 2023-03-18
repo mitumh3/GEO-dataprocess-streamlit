@@ -1,46 +1,51 @@
+import asyncio
 import gzip
+import os
 import ssl
 import urllib.request
-import asyncio
+
 import numpy as np
 import pandas as pd
 import streamlit as st
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from GEOparse import utils as GEO
-import os
 
 load_dotenv()
-dataset_path = os.getenv("dataset_path")
-result_path = os.getenv("result_path")
+DATASET_PATH = os.getenv("dataset_path")
 
-async def get_data(accession_ID):
+
+async def get_data(accession_id):
     # Set Accession ID and folder path for saving files
     context = ssl._create_unverified_context()
-    url1 = f"https://ftp.ncbi.nlm.nih.gov/geo/series/{accession_ID[:-3]}nnn/{accession_ID}/"
+    url1 = f"https://ftp.ncbi.nlm.nih.gov/geo/series/{accession_id[:-3]}nnn/{accession_id}/"
     geo_folders = ["matrix/", "miniml/", "soft/", "suppl/"]
     filelist = {}
-    GEO.mkdir_p(dataset_path)
+    GEO.mkdir_p(DATASET_PATH)
 
     for file_prefix in geo_folders:
         url2 = f"{url1}/{file_prefix}"
 
         # Find all links in the HTML content
-        links = BeautifulSoup(urllib.request.urlopen(url2, context=context).read(), "html.parser").find_all("a")
+        links = BeautifulSoup(
+            urllib.request.urlopen(url2, context=context).read(), "html.parser"
+        ).find_all("a")
 
         # Print the file names
         for link in links:
             file_name = link.get("href")
-            if (file_name.endswith(".txt.gz") 
-                    or file_name.endswith(".tsv.gz") 
-                    or file_name.endswith(".csv.gz")):
+            if (
+                file_name.endswith(".txt.gz")
+                or file_name.endswith(".tsv.gz")
+                or file_name.endswith(".csv.gz")
+            ):
                 filelist[file_name] = file_prefix
 
     loop = asyncio.get_event_loop()
     coros = []
     for file_name, file_prefix in filelist.items():
         # Down file and process
-        coro = process(url1, file_name, file_prefix, loop) 
+        coro = process(url1, file_name, file_prefix, loop)
         coros.append(coro)
     data_lst = await asyncio.gather(*coros)
     # loop.close()
@@ -55,7 +60,7 @@ async def get_data(accession_ID):
             try:
                 exp = data["expression"].T
                 exp = exp.set_axis(exp.iloc[0], axis=1).iloc[1:]
-            except:
+            except BaseException:
                 exp = pd.DataFrame()
             gen = data["general"]
             # Add elements in data to existing expression, general and clinical
@@ -79,14 +84,15 @@ async def get_data(accession_ID):
     warn = check_dataframe_integrity(clinical)
     return expression_data, gereral_data, clinical, data_extra, warn
 
+
 def download_file(url, filepath):
     GEO.download_from_url(url, destination_path=filepath)
 
 
 async def process(url1, file_name, file_prefix, loop):
     url = f"{url1}{file_prefix}{file_name}"
-    filepath = f"{dataset_path}/{file_name}"
-    # Download files 
+    filepath = f"{DATASET_PATH}/{file_name}"
+    # Download files
     await loop.run_in_executor(None, download_file, url, filepath)
     # Read files
     with gzip.open(filepath, "rt") as f:
@@ -109,7 +115,7 @@ async def process(url1, file_name, file_prefix, loop):
 
     check1 = df[df[0].str.contains("!series_matrix_table", na=False)]
     if check1.empty:
-        data = {"filename":file_name, "extra":process_extra(df)}
+        data = {"filename": file_name, "extra": process_extra(df)}
     else:
         data = process_series_matrix(df)
     return data
@@ -118,14 +124,19 @@ async def process(url1, file_name, file_prefix, loop):
 def process_series_matrix(df):
     drop_list = ["!sample_relation", "!sample_supplementary_file"]
     data = {"type": "series_matrix"}
-    # Cut out expression data based on !series_matrix_table_begin and !series_matrix_table_end
+    # Cut out expression data based on !series_matrix_table_begin and
+    # !series_matrix_table_end
     try:
         start, end = df[df[0].str.contains("!series_matrix_table", na=False)].index
         expression_data = df.iloc[start + 1 : end]
         # Rename columns as sample id and reindex rows
-        expression_data = expression_data.rename(columns=expression_data.iloc[0, :]).iloc[1:, :].reset_index(drop=True)
+        expression_data = (
+            expression_data.rename(columns=expression_data.iloc[0, :])
+            .iloc[1:, :]
+            .reset_index(drop=True)
+        )
         data["expression"] = expression_data
-    except:
+    except BaseException:
         data["expression"] = pd.DataFrame()
         print("No expression data")
 
@@ -137,7 +148,9 @@ def process_series_matrix(df):
     df1 = df1.dropna(how="all")
     # Transpose and Rename columns as sample features and reindex rows
     clinical_data = df1.transpose().set_axis(df1.index, axis=1)
-    clinical_data = clinical_data.rename(columns={col: col.lower() for col in clinical_data.columns})
+    clinical_data = clinical_data.rename(
+        columns={col: col.lower() for col in clinical_data.columns}
+    )
 
     # Drop columns based on drop_list
     dropped_cols = [col for col in drop_list if col in clinical_data.columns]
@@ -147,29 +160,28 @@ def process_series_matrix(df):
     print(f"\nUnused columns from drop_list: {unused_cols}")
 
     # Fix duplicate column names
-    class renamer:
+    class Renamer:
         def __init__(self):
-            self.d = dict()
+            self.d = {}
 
         def __call__(self, x):
             if x not in self.d:
                 self.d[x] = 0
                 return x
-            else:
-                self.d[x] += 1
-                return "%s_%d" % (x, self.d[x])
+            self.d[x] += 1
+            return f"{x}_{self.d[x]}"
 
-    clinical_data.rename(columns=renamer(), inplace=True)
+    clinical_data.rename(columns=Renamer(), inplace=True)
 
     # Clear column with one value from dataframe
     sample_general_info = {"Feature": [], "Info": []}
     column_take = []
-    for i in range(len(clinical_data.columns)):
-        if len(set(clinical_data.iloc[:, i])) == 1:
-            sample_general_info["Feature"].append(clinical_data.columns[i])
-            sample_general_info["Info"].append(list(set(clinical_data.iloc[:, i])).pop())
+    for col_idx, col_name in enumerate(clinical_data.columns):
+        if len(set(clinical_data.iloc[:, col_idx])) == 1:
+            sample_general_info["Feature"].append(clinical_data.columns[col_idx])
+            sample_general_info["Info"].append(list(set(clinical_data.iloc[:, col_idx])).pop())
         else:
-            column_take.append(i)
+            column_take.append(col_idx)
     clean_clinical_data = clinical_data.iloc[:, column_take]
 
     # Create sample general info table
@@ -178,7 +190,7 @@ def process_series_matrix(df):
     # Take out data from one cells with split ": "
     cleaned_clinical_data = pd.DataFrame()
     for t in range(clean_clinical_data.shape[0]):
-        df2 = pd.DataFrame(clean_clinical_data.loc[t]).T
+        df2 = pd.DataFrame(clean_clinical_data.loc[t]).transpose()
         # print(df2)
         column_take2 = []
         new_feature = pd.DataFrame()
@@ -196,8 +208,11 @@ def process_series_matrix(df):
         df2 = df2[column_take2]
         try:
             index_no = df2.columns.get_loc("!sample_geo_accession")
-            df2 = pd.concat([df2.iloc[:, : index_no + 1], new_feature, df2.iloc[:, index_no + 1 :]], axis=1)
-        except:
+            df2 = pd.concat(
+                [df2.iloc[:, : index_no + 1], new_feature, df2.iloc[:, index_no + 1 :]],
+                axis=1,
+            )
+        except BaseException:
             print("Cannot find !sample_geo_accession")
 
         cleaned_clinical_data = pd.concat([cleaned_clinical_data, df2])
@@ -208,10 +223,10 @@ def process_series_matrix(df):
     return data
 
 
-def process_extra(df):
+def process_extra(df_extra):
     # Set first row as column names
-    df.columns = df.iloc[0]
-    data = df.drop(0)
+    df_extra.columns = df_extra.iloc[0]
+    data = df_extra.drop(0)
     return data
 
 
@@ -225,7 +240,7 @@ def check_dataframe_integrity(df):
         try:
             warn = f"WARNING: Missing values found in the following columns: {', '.join(missing_values[missing_values>0].index)}"
             print(warn)
-        except:
+        except BaseException:
             print("Columns only have index not name")
             print(missing_values[missing_values > 0].index)
         for col in missing_values[missing_values > 0].index:
@@ -282,18 +297,22 @@ def merge_data(data_extra, exp_data, clin_data):
 
             # Merge clinical data
             maxcheck2 = {}
-            for i in clin_data.columns:
-                for t in clinical_extra.columns:
-                    check2 = clin_data[clin_data[i].isin(clinical_extra[t])][i]
+            for old_column in clin_data.columns:
+                for extra_column in clinical_extra.columns:
+                    check2 = clin_data[clin_data[old_column].isin(clinical_extra[extra_column])][
+                        old_column
+                    ]
                     check2 = check2.dropna()
                     if len(check2) != 0:
                         if len(check2) > len(maxcheck2):
                             maxcheck2 = check2
-                            print(i, t)
-                            col_1 = i
-                            col_2 = t
-            st.write(i, t)
-            clinical = pd.merge(clin_data, clinical_extra, left_on=col_1, right_on=col_2, how="inner")
+                            print(old_column, extra_columnt)
+                            col_1 = old_column
+                            col_2 = extra_column
+            st.write(old_column, extra_column)
+            clinical = pd.merge(
+                clin_data, clinical_extra, left_on=col_1, right_on=col_2, how="inner"
+            )
             st.session_state.clin_data = clinical
             st.session_state.extra = data_extra
         else:

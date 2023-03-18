@@ -1,15 +1,16 @@
+import asyncio
 import os
 import re
-import asyncio
 
 import streamlit as st
 from dotenv import load_dotenv
 
-from helper import *
-from process_func import *
+from helper import handle_extra, on_main_click, on_no_click, on_yes_click
+from process_func import get_data
 
 load_dotenv()
-dataset_path = os.getenv("dataset_path")
+DATASET_PATH = os.getenv("dataset_path")
+
 
 async def main():
     # Add title
@@ -19,12 +20,13 @@ async def main():
     try:
         available_datasets = set(
             word
-            for file in os.listdir(dataset_path)
+            for file in os.listdir(DATASET_PATH)
             if file.endswith("_series_matrix.txt.gz")
             for word in re.findall(r"[^\W_]+", file)
             if word.startswith("GSE")
         )
-    except: available_datasets = ""
+    except BaseException:
+        available_datasets = ""
     st.session_state.available_datasets = available_datasets
     avail_datasets = (
         " | ".join(str(item) for item in st.session_state.available_datasets)
@@ -34,13 +36,13 @@ async def main():
 
     # Add a text input form
     with st.form("GEO_form"):
-        geoID = st.text_input("Enter GEO Accession ID here:")
+        geo_id = st.text_input("Enter GEO Accession ID here:")
         # Every form must have a submit button.
-        submitGEO_button = st.form_submit_button(label="Submit")
+        submit_button_geo = st.form_submit_button(label="Submit")
         st.write(">>>>> Dataset(s) found in your folder:")
         st.write(avail_datasets)
     # Only if the submit button is clicked once that the code continue
-    if submitGEO_button:
+    if submit_button_geo:
         st.session_state.button_GEO = "clicked"
         st.session_state.processed = False
         st.session_state.button_extra = False
@@ -50,13 +52,16 @@ async def main():
 
     # Results after submit
     else:
-        st.write("You entered:", geoID)
-        st.write("\n<h1 style='text-align: center;'>" + geoID + "</h1>\n", unsafe_allow_html=True)
+        st.write("You entered:", geo_id)
+        st.write(
+            "\n<h1 style='text-align: center;'>" + geo_id + "</h1>\n",
+            unsafe_allow_html=True,
+        )
         # st.session_state
         # Bind 3 main dataframes to variables
-        if st.session_state.processed == False:
+        if not st.session_state.processed:
             with st.spinner("Processing..."):
-                exp_data, general_info, clin_data, data_extra, warn = await get_data(geoID)
+                exp_data, general_info, clin_data, data_extra, warn = await get_data(geo_id)
                 st.session_state.exp_data = exp_data
                 st.session_state.general_info = general_info
                 st.session_state.clin_data = clin_data
@@ -75,7 +80,7 @@ async def main():
 
         # Display data
         num_rows1, num_cols1 = exp_data.shape
-        num_rows2, num_cols2 = general_info.shape
+        num_rows2 = general_info.shape[0]
         num_rows3, num_cols3 = clin_data.shape
         col1, col2 = st.columns(2)
         # First Dataframe
@@ -93,7 +98,9 @@ async def main():
         st.write(num_rows3, " samples with ", num_cols3, " features")
         # Create a column selection field and a submit button
         with st.form("clin_data_form"):
-            feature_selection = st.multiselect("Choose columns to filter and submit", clin_data.columns)
+            feature_selection = st.multiselect(
+                "Choose columns to filter and submit", clin_data.columns
+            )
             submit_button_columnsel = st.form_submit_button(label="Submit choice")
             # Every form must have a submit button.
         if submit_button_columnsel:
@@ -108,15 +115,24 @@ async def main():
     if "show_secondary" not in st.session_state:
         st.session_state.show_secondary = False
     if not st.session_state.show_secondary:
-        st.button("Export files", on_click=on_main_click, args=(exp_data, general_info, clin_data, geoID))
+        st.button(
+            "Export files",
+            on_click=on_main_click,
+            args=(exp_data, general_info, clin_data, geo_id),
+        )
     if st.session_state.show_secondary:
         # if os.path.exists(file_path + "_clinical"):
         st.warning(
-            "Result files are found in the folder, overwrite existing files?\nRemember to close files before overwriting"
+            "Result files are found in the folder, overwrite existing files?\n"
+            "Remember to close files before overwriting"
         )
         col1, col2 = st.columns(2)
         with col1:
-            st.button("Yes", on_click=on_yes_click, args=(exp_data, general_info, clin_data, geoID))
+            st.button(
+                "Yes",
+                on_click=on_yes_click,
+                args=(exp_data, general_info, clin_data, geo_id),
+            )
         with col2:
             st.button("No", on_click=on_no_click)
 
