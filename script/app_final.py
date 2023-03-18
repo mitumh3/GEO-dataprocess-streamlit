@@ -4,8 +4,8 @@ import re
 
 import streamlit as st
 from dotenv import load_dotenv
-
 from helper import handle_extra, on_main_click, on_no_click, on_yes_click
+
 from process_func import get_data
 
 load_dotenv()
@@ -121,7 +121,6 @@ async def main():
             args=(exp_data, general_info, clin_data, geo_id),
         )
     if st.session_state.show_secondary:
-        # if os.path.exists(file_path + "_clinical"):
         st.warning(
             "Result files are found in the folder, overwrite existing files?\n"
             "Remember to close files before overwriting"
