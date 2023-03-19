@@ -62,20 +62,41 @@ clinical_data.index.name = None
 
 
 pd.options.mode.chained_assignment = None  # default='warn'
+def binary_value(df, unique_values, col):
+    first_value = unique_values[0]
+    if ("no" in first_value
+        or "negative" in first_value
+        or "without" in first_value):
+        df[col][df[col] == first_value]        = 0
+        df[col][df[col] == unique_values[1]]   = 1
+    else:
+        df[col][df[col] == first_value]        = 1
+        df[col][df[col] == unique_values[1]]   = 0
+
+binary_lst = []
+numeric_lst = []
 for col in clinical_data.columns:
     unique_values = list(set(clinical_data[col]))
+    # Format unknown value
     unique_values = unknown_value(clinical_data, unique_values, col)
-    if len(unique_values) == 2:
-        first_value = unique_values[0]
-        if ("no" in first_value
-            or "negative" in first_value
-            or "without" in first_value):
-            clinical_data[col][clinical_data[col] == first_value]        = 0
-            clinical_data[col][clinical_data[col] == unique_values[1]]   = 1
-        else:
-            clinical_data[col][clinical_data[col] == first_value]        = 1
-            clinical_data[col][clinical_data[col] == unique_values[1]]   = 0
 
+    # Format binary value (1, 0) and rename binary column
+    if len(unique_values) == 2:
+        binary_lst.append(col)
+        binary_value(clinical_data, unique_values, col)
+        clinical_data.rename(columns={col: f"binary_{col}"}, inplace=True)
+    
+    # Rename numeric column
+    elif pd.api.types.is_numeric_dtype(clinical_data[col]):
+        numeric_lst.append(col)
+        clinical_data.rename(columns={col: f"numeric_{col}"}, inplace=True)
+
+    # Rename unclassified column
+    else: 
+        clinical_data.rename(columns={col: f"data_{col}"}, inplace=True)
+
+
+clinical_data = clinical_data.sort_index(axis=1)
 merged_data=clinical_data.merge(expression_data, right_index=True, left_index= True)
 
 st.write(clinical_data)
