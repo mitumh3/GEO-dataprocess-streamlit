@@ -1,5 +1,5 @@
 @echo off
-if not exist ".\script\setup-done.txt" (
+if not exist ".\scripts\setup-done.txt" (
     cd script
     call python_install.bat
 ) else (

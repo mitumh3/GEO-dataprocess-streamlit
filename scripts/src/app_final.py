@@ -2,12 +2,14 @@ import streamlit as st
 
 from display_helper import *
 from main_helper import *
+from plotting import *
 
+# Format page
+st.set_page_config(page_title="Process Data")
+st.session_state.initial = st.session_state
 
-def main():
-    # Format page
-    st.set_page_config(page_title="Process Data")
-    st.session_state.initial = st.session_state
+def geo_data_process():
+    st.write("# Process Data 👋")
     st.session_state.button_extra = False
 
     # display datasets found
@@ -76,6 +78,36 @@ def main():
         with col2:
             st.button("No", on_click=on_no_click)
 
+# def plotting():
 
+#     # display datasets found
+#     dataset_list = get_available_datasets()
+#     geo_id, submit_button_geo = submit_geo_id(dataset_list)
+
+#     # continue only if submit button was clicked
+#     if submit_button_geo:
+#         st.session_state.button_GEO = "clicked"
+#         st.session_state.processed = False
+#         st.session_state.button_extra = False
+#     if "button_GEO" not in st.session_state:
+#         st.write("Click Submit to continue")
+#         # st.stop()
+
+#     # results and data after submit
+#     else:
+#         st.write("You entered:", geo_id)
+#         st.write(
+#             "\n<h1 style='text-align: center;'>" + geo_id + "</h1>\n",
+#             unsafe_allow_html=True,
+#         )
 if __name__ == "__main__":
-    main()
+    page_names_to_funcs = {
+    "—": geo_data_process,
+    "Plotting Demo": plotting
+    # "Mapping Demo": mapping_demo,
+    # "DataFrame Demo": data_frame_demo
+}
+
+    demo_name = st.sidebar.selectbox("Choose tools", page_names_to_funcs.keys())
+    page_names_to_funcs[demo_name]()
+    # main()
