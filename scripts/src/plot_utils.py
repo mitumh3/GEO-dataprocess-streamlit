@@ -1,0 +1,188 @@
+from dataclasses import dataclass
+
+import numpy as np
+import pandas as pd
+from pandas import DataFrame
+from scipy.stats import zscore
+
+
+def match_column_with_expression_index(df_exp, df_clin):
+    # define the list of values to search for
+    search_list = list(df_exp.index)
+
+    # create a boolean mask for each column indicating which rows contain any of the given values
+    mask = df_clin.apply(lambda x: x.isin(search_list))
+
+    # sum the number of True values in each column to get the total count of times the given values appear in that column
+    counts = mask.sum()
+
+    # find the column with the highest count
+    matched_col = counts.idxmax()
+
+    # print the result
+    print("\nThe column picked to merge clinical and expression data: ", matched_col)
+    return matched_col
+
+
+def handle_unknown_values(df, unique_values, col):
+    for value in unique_values:
+        try:
+            if "unknown" in value or "Na" in value or "NaN" in value or "None" in value:
+                df[col][df[col] == value] = np.NaN
+                unique_values.remove(value)
+        except Exception as e:
+            pass
+    return unique_values
+
+
+def handle_binary_column(df, unique_values, column):
+    first_value = unique_values[0]
+    if "no" in first_value or "negative" in first_value or "without" in first_value:
+        df[column][df[column] == first_value] = 0
+        df[column][df[column] == unique_values[1]] = 1
+    else:
+        df[column][df[column] == first_value] = 1
+        df[column][df[column] == unique_values[1]] = 0
+    df[column] = pd.to_numeric(df[column])
+
+
+def handle_numeric_column(df, column):
+    try:
+        df[column] = pd.to_numeric(df[column])
+        return True
+    except ValueError:
+        return False
+
+
+def check_numeric_in_unclassified_column(df, column, threshold):
+    non_num = []
+    for i in df[column]:
+        try:
+            pd.to_numeric(i)
+        except:
+            non_num.append(i)
+    non_num_ratio = len(non_num) / len(df[column])
+
+    if non_num_ratio <= threshold:
+        unique_non_num = set(non_num)
+        print(f"\nOmited {unique_non_num} in {column}")
+        for value in unique_non_num:
+            df[column][df[column] == value] = np.NaN
+        df[column] = pd.to_numeric(df[column])
+        return True
+    else:
+        return False
+
+
+def set_numeric_binary_data(df):
+    binary_lst = []
+    numeric_lst = []
+    for col in df.columns:
+        unique_values = list(set(df[col]))
+        # Format unknown value
+        unique_values = handle_unknown_values(df, unique_values, col)
+
+        # Format binary value (1, 0) and rename binary column
+        if len(unique_values) == 2:
+            binary_lst.append(col)
+            handle_binary_column(df, unique_values, col)
+            df.rename(columns={col: f"binary_{col}"}, inplace=True)
+
+        # Rename numeric column
+        elif handle_numeric_column(df, col):
+            numeric_lst.append(col)
+            df.rename(columns={col: f"numeric_{col}"}, inplace=True)
+
+        # Rename unclassified column
+        elif check_numeric_in_unclassified_column(df, col, threshold=0.1):
+            numeric_lst.append(col)
+            df.rename(columns={col: f"numeric_{col}"}, inplace=True)
+        else:
+            df.rename(columns={col: f"info_{col}"}, inplace=True)
+            # df = df.drop(columns=col)
+    df = df.sort_index(axis=1)
+    return df
+
+
+@dataclass
+class PlotData:
+    merged_data = None
+
+    clinical_data: DataFrame
+    patient_id = None
+    binary_data = None
+    numeric_data = None
+    info_data = None
+
+    expression_data: DataFrame
+    gene_lst = None
+
+    def clean_clinical(self):
+        self.clinical_data = set_numeric_binary_data(self.clinical_data)
+
+    def clean_expression(self):
+        self.gene_lst = self.expression_data.iloc[:, 0]
+        self.expression_data = self.expression_data.transpose()
+        self.expression_data = self.expression_data.rename(
+            columns=self.expression_data.iloc[0, :]
+        ).iloc[1:, :]
+        self.expression_data = self.expression_data.apply(
+            pd.to_numeric, errors="coerce"
+        )
+
+    # Find column that match the index of expression data
+    def pick_similar_column(self):
+        matched_col = match_column_with_expression_index(
+            self.expression_data, self.clinical_data
+        )
+        self.clinical_data = self.clinical_data.set_index(matched_col)
+        self.clinical_data.index.name = None
+
+    def drop_and_return_column(self, prefix):
+        col_lst = [col for col in self.merged_data.columns if col.startswith(prefix)]
+        cols = self.merged_data[col_lst]
+        self.merged_data = self.merged_data.drop(columns=col_lst)
+        return cols.T
+
+    def generate_data(self):
+        # Preprocess expression data
+        self.clean_expression()
+
+        # Clean clinical data
+        self.clean_clinical()
+
+        # Pick similar column for merging
+        self.pick_similar_column()
+
+        # Merge clinical and expression data
+        self.merged_data = self.clinical_data.merge(
+            self.expression_data, right_index=True, left_index=True
+        )
+        self.merged_data = self.merged_data.reset_index()
+
+        # Take out expression data
+        self.expression_data = self.merged_data[self.gene_lst].T
+        self.merged_data = self.merged_data.drop(columns=self.gene_lst)
+
+        # Take out different clinical data
+        self.patient_id = self.drop_and_return_column("index")
+        self.binary_data = self.drop_and_return_column("binary")
+        self.numeric_data = self.drop_and_return_column("numeric")
+        self.info_data = self.drop_and_return_column("info")
+
+    def get_expression(self, num_rows: int = -1, normalize: bool = False):
+        df = self.expression_data
+        if normalize == True:
+            df = df.apply(zscore, ddof=df.shape[0] - 1)
+        if num_rows == -1:
+            return df
+        else:
+            return df.iloc[:num_rows, :]
+
+    def get_label(self, label_name: str = None):
+        label = [
+            rownames
+            for rownames in self.binary_data.index
+            if rownames.endswith(label_name)
+        ]
+        return self.binary_data.loc[label]
