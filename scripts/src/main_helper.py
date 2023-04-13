@@ -4,7 +4,6 @@ import re
 
 import streamlit as st
 from dotenv import load_dotenv
-
 from process_func import get_data, merge_data
 
 load_dotenv()
@@ -58,9 +57,9 @@ async def export(exp_data, general_info, clin_data, geo_id):
     folder_path = f"{RESULT_PATH}/{geo_id}"
     file_path = f"{folder_path}/{geo_id}"
     with st.spinner("Exporting..."):
-        if not os.path.exists("../processed_data/"):
+        if not os.path.exists(RESULT_PATH):
             print("\nFolder 'processed_data' created")
-            os.mkdir("../processed_data/")
+            os.mkdir(RESULT_PATH)
         if not os.path.exists(folder_path):
             print("\nFolder ", geo_id, " created")
             os.mkdir(folder_path)

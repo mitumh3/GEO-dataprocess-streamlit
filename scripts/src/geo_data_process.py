@@ -1,12 +1,9 @@
 import streamlit as st
-
 from display_helper import *
 from main_helper import *
-from plotting import *
 
-# Format page
-st.set_page_config(page_title="Process Data")
-st.session_state.initial = st.session_state
+# from plotting import *
+
 
 def geo_data_process():
     st.write("# Process Data 👋")
@@ -25,7 +22,7 @@ def geo_data_process():
         st.write("Click Submit to continue")
         st.stop()
 
-    # results and data after submit
+    # Display results and data after submit
     else:
         st.write("You entered:", geo_id)
         st.write(
@@ -78,6 +75,7 @@ def geo_data_process():
         with col2:
             st.button("No", on_click=on_no_click)
 
+
 # def plotting():
 
 #     # display datasets found
@@ -100,14 +98,3 @@ def geo_data_process():
 #             "\n<h1 style='text-align: center;'>" + geo_id + "</h1>\n",
 #             unsafe_allow_html=True,
 #         )
-if __name__ == "__main__":
-    page_names_to_funcs = {
-    "—": geo_data_process,
-    "Plotting Demo": plotting
-    # "Mapping Demo": mapping_demo,
-    # "DataFrame Demo": data_frame_demo
-}
-
-    demo_name = st.sidebar.selectbox("Choose tools", page_names_to_funcs.keys())
-    page_names_to_funcs[demo_name]()
-    # main()
