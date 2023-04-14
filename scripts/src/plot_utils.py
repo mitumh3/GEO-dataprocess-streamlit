@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame
 from scipy.stats import zscore
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
 def match_column_with_expression_index(df_exp, df_clin):
@@ -173,7 +174,9 @@ class PlotData:
     def get_expression(self, num_rows: int = -1, normalize: bool = False):
         df = self.expression_data
         if normalize == True:
-            df = df.apply(zscore, ddof=df.shape[0] - 1)
+            scaler = StandardScaler()
+            df = pd.DataFrame(scaler.fit_transform(df.T), columns=df.index).T
+            # df = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
         if num_rows == -1:
             return df
         else:

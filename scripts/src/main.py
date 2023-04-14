@@ -1,14 +1,14 @@
 import streamlit as st
-from geo_data_process import geo_data_process as geo
+from geo_data_process import geo_data_process
+from heatmap_plot import heatmap_plot
+from streamlit import session_state as cache
 
 # Format page
 st.set_page_config(page_title="Process Data")
-st.session_state.initial = st.session_state
-
 if __name__ == "__main__":
     page_names_to_funcs = {
-        "—": geo,
-        # "Plotting Demo": plotting
+        "—": geo_data_process,
+        "Plotting Demo": heatmap_plot
         # "Mapping Demo": mapping_demo,
         # "DataFrame Demo": data_frame_demo
     }

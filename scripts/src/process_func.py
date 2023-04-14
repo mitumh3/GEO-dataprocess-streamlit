@@ -5,8 +5,8 @@ import os
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
-
 from process_helper import *
+from streamlit import session_state as cache
 
 load_dotenv()
 DATASET_PATH = os.getenv("dataset_path")
@@ -115,24 +115,24 @@ def process_extra(df_extra):
 def merge_data(data_extra, exp_data, clin_data):
     for i in range(len(data_extra)):
         file_name = list(data_extra)[0]
-        if st.session_state[file_name] == "Expression data":
+        if cache[file_name] == "Expression data":
             exp_data = pd.concat([exp_data, data_extra.pop(file_name)])
             exp_data.index.name = None
             exp_data = exp_data.dropna(how="all")
             exp_data = exp_data.reset_index(drop=True)
             # exp_data = exp_data.set_index(exp_data.columns[0])
-            st.session_state.exp_data = exp_data
-            st.session_state.extra = data_extra
-        elif st.session_state[file_name] == "Clinical data":
+            cache.exp_data = exp_data
+            cache.extra = data_extra
+        elif cache[file_name] == "Clinical data":
             clinical_extra = data_extra.pop(file_name)
 
             # Merge clinical data
             maxcheck2 = {}
             for old_column in clin_data.columns:
                 for extra_column in clinical_extra.columns:
-                    check2 = clin_data[clin_data[old_column].isin(clinical_extra[extra_column])][
-                        old_column
-                    ]
+                    check2 = clin_data[
+                        clin_data[old_column].isin(clinical_extra[extra_column])
+                    ][old_column]
                     check2 = check2.dropna()
                     if len(check2) != 0:
                         if len(check2) > len(maxcheck2):
@@ -144,8 +144,8 @@ def merge_data(data_extra, exp_data, clin_data):
             clinical = pd.merge(
                 clin_data, clinical_extra, left_on=col_1, right_on=col_2, how="inner"
             )
-            st.session_state.clin_data = clinical
-            st.session_state.extra = data_extra
+            cache.clin_data = clinical
+            cache.extra = data_extra
         else:
             data_extra.pop(file_name)
-            st.session_state.extra = data_extra
+            cache.extra = data_extra

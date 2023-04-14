@@ -53,3 +53,4 @@ watchdog==2.3.1
 zipp==3.15.0
 python-dotenv
 seaborn
+scikit-learn

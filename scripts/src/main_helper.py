@@ -5,6 +5,7 @@ import re
 import streamlit as st
 from dotenv import load_dotenv
 from process_func import get_data, merge_data
+from streamlit import session_state as cache
 
 load_dotenv()
 RESULT_PATH = os.getenv("result_path")
@@ -23,24 +24,22 @@ def get_available_datasets():
         )
     except BaseException:
         available_datasets = ""
-    st.session_state.available_datasets = available_datasets
-    dataset_list = (
-        " | ".join(str(item) for item in st.session_state.available_datasets)
-        if st.session_state.available_datasets
-        else None
-    )
-    return dataset_list
+    dataset_lst = list(available_datasets)
+    cache.available_datasets = available_datasets
+    return dataset_lst
 
 
 # Func to initiate processing data
 def run_process(geo_id):
-    exp_data, general_info, clin_data, data_extra, warn = asyncio.run(get_data(geo_id))
-    st.session_state.exp_data = exp_data
-    st.session_state.general_info = general_info
-    st.session_state.clin_data = clin_data
-    st.session_state.warn = warn
-    st.session_state.extra = data_extra
-    st.session_state.processed = True
+    data_exp, data_general_info, data_clin, data_extra, warn = asyncio.run(
+        get_data(geo_id)
+    )
+    cache.data_exp = data_exp
+    cache.data_general_info = data_general_info
+    cache.data_clin = data_clin
+    cache.warn = warn
+    cache.data_extra = data_extra
+    cache.processed = True
 
 
 # Func to save files to csv
@@ -53,7 +52,7 @@ async def save_csv(data, path, message):
 
 
 # Func to export data
-async def export(exp_data, general_info, clin_data, geo_id):
+async def export(data_exp, data_general_info, data_clin, geo_id):
     folder_path = f"{RESULT_PATH}/{geo_id}"
     file_path = f"{folder_path}/{geo_id}"
     with st.spinner("Exporting..."):
@@ -64,36 +63,36 @@ async def export(exp_data, general_info, clin_data, geo_id):
             print("\nFolder ", geo_id, " created")
             os.mkdir(folder_path)
         await asyncio.gather(
-            save_csv(exp_data, f"{file_path}_expression.csv", "expression data"),
-            save_csv(general_info, f"{file_path}_generalinfo.csv", "general info"),
-            save_csv(clin_data, f"{file_path}_clinical.csv", "clinical data"),
+            save_csv(data_exp, f"{file_path}_expression.csv", "expression data"),
+            save_csv(data_general_info, f"{file_path}_generalinfo.csv", "general info"),
+            save_csv(data_clin, f"{file_path}_clinical.csv", "clinical data"),
         )
         st.success("Files exported!")
 
 
 # Func to handle export click
-def on_main_click(exp_data, general_info, clin_data, geo_id):
+def on_main_click(data_exp, data_general_info, data_clin, geo_id):
     folder_path = f"{RESULT_PATH}/{geo_id}"
     if not os.path.exists(folder_path):
-        st.session_state.show_secondary = False
-        asyncio.run(export(exp_data, general_info, clin_data, geo_id))
+        cache.show_secondary = False
+        asyncio.run(export(data_exp, data_general_info, data_clin, geo_id))
     else:
-        st.session_state.show_secondary = True
+        cache.show_secondary = True
 
 
 # Func to handle yes click of export
-def on_yes_click(exp_data, general_info, clin_data, geo_id):
-    st.session_state.show_secondary = False
-    asyncio.run(export(exp_data, general_info, clin_data, geo_id))
+def on_yes_click(data_exp, data_general_info, data_clin, geo_id):
+    cache.show_secondary = False
+    asyncio.run(export(data_exp, data_general_info, data_clin, geo_id))
 
 
 # Func to handle no click of export
 def on_no_click():
-    st.session_state.show_secondary = False
+    cache.show_secondary = False
 
 
 # Func to handle and display unused files
-def handle_extra(data_extra, exp_data, clin_data):
+def handle_extra(data_extra, data_exp, data_clin):
     n_data_extra = len(data_extra)
     if n_data_extra != 0:
         st.subheader("Unused files")
@@ -110,12 +109,31 @@ def handle_extra(data_extra, exp_data, clin_data):
                     st.write(data_extra[file_name].head())
             submit_button_extra = st.form_submit_button(label="Submit choice")
         if submit_button_extra:
-            st.session_state.button_extra = True
-        if not st.session_state.button_extra:
+            cache.button_extra = True
+        if not cache.button_extra:
             st.write("Submit to add unused data to the chosen data")
 
-        #     # Action when submit button is clicked
+        ## Action when submit button is clicked
         else:
             # st.write(data_extra)
-            merge_data(data_extra, exp_data, clin_data)
+            merge_data(data_extra, data_exp, data_clin)
             st.experimental_rerun()
+
+
+def delete_cache(keep_lst=[]):
+    # Delete all the items in Session state
+    if cache.page != cache.current_page:
+        keep_dict = {"current_page": cache.page}
+        for key in cache.keys():
+            if key in keep_lst:
+                keep_dict[key] = cache[key]
+            del cache[key]
+        for key in keep_dict.keys():
+            cache[key] = keep_dict[key]
+
+
+def start_page(page_name, keep_cache_lst):
+    cache.page = page_name
+    if "current_page" not in cache:
+        cache.current_page = ""
+    delete_cache(keep_cache_lst)

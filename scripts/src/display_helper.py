@@ -1,13 +1,17 @@
 import streamlit as st
+from streamlit import session_state as cache
 
 
 # Function to create submit button for ACCESSION ID input
-def submit_geo_id(dataset_list):
+def submit_geo_id(dataset_lst):
     with st.form("GEO_form"):
         geo_id = st.text_input("Enter GEO Accession ID here:")
+        cache.geo_id = geo_id
         submit_button_geo = st.form_submit_button(label="Submit")
+
+        dataset_str = " | ".join(dataset_lst)
         st.write(">>>>> Dataset(s) found in your folder:")
-        st.write(dataset_list)
+        st.write(dataset_str)
     return geo_id, submit_button_geo
 
 
@@ -33,11 +37,13 @@ def display_data(exp_data, general_info, clin_data):
 # Function to display column selection
 def display_column_selection(form, clin_data, warn):
     with form:
-        feature_selection = st.multiselect("Choose columns to filter and submit", clin_data.columns)
+        feature_selection = st.multiselect(
+            "Choose columns to filter and submit", clin_data.columns
+        )
         submit_button_columnsel = st.form_submit_button(label="Submit choice")
     if submit_button_columnsel:
-        st.session_state.button_columnsel = "clicked"
-    if "button_columnsel" not in st.session_state or len(feature_selection) == 0:
+        cache.button_columnsel = "clicked"
+    if "button_columnsel" not in cache or len(feature_selection) == 0:
         st.write(clin_data)
         st.write(warn)
     else:

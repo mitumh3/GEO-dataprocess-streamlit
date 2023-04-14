@@ -2,13 +2,11 @@ import os
 
 import altair as alt
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import seaborn as sns
 import streamlit as st
 from dotenv import load_dotenv
 from plot_utils import *
-from scipy.stats import zscore
 
 load_dotenv()
 RESULT_PATH = os.getenv("result_path")
@@ -76,9 +74,13 @@ def clustermap(data: DataFrame, label=None):
         data,
         # cmap="Blues",
         cmap="seismic",
+        # cmap="coolwarm",
+        # cmap="plasma",
         col_cluster=False,
         metric="euclidean",
         method="complete",
+        # center=0.0,
+        figsize=(12, 3 + 0.01 * data.shape[0]),
         cbar_kws={"label": "Expression"},
         linewidths=0.2,
         col_colors=row_colors,
@@ -90,9 +92,10 @@ def clustermap(data: DataFrame, label=None):
     st.pyplot()
 
 
-df = data.get_expression(num_rows=10000, normalize=True)
-df
-# label = data.binary_data
+df = data.get_expression(num_rows=100, normalize=True)
+# df
+data.binary_data
 label = data.get_label("disease state")
+df
 label
 clustermap(df, label)
