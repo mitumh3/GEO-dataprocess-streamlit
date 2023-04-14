@@ -7,8 +7,8 @@ from streamlit import session_state as cache
 st.set_page_config(page_title="Process Data")
 if __name__ == "__main__":
     page_names_to_funcs = {
-        "—": geo_data_process,
-        "Plotting Demo": heatmap_plot
+        "Process Data": geo_data_process,
+        "Plot": heatmap_plot
         # "Mapping Demo": mapping_demo,
         # "DataFrame Demo": data_frame_demo
     }

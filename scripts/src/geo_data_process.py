@@ -43,6 +43,7 @@ def geo_data_process():
         if not cache.processed:
             with st.spinner("Processing..."):
                 run_process(geo_id)
+
         data_exp = cache.data_exp
         data_general_info = cache.data_general_info
         data_clin = cache.data_clin
@@ -53,8 +54,14 @@ def geo_data_process():
         handle_extra(data_extra, data_exp, data_clin)
 
         # Display data and selection of clinical data
-        form, data_clin = display_data(data_exp, data_general_info, data_clin)
-        display_column_selection(form, data_clin, warn)
+        display_exp_and_extra(data_exp, data_general_info)
+
+        columns = data_clin.columns
+        feature_selection = display_column_selection(columns)
+        display_clin(data_clin, warn, feature_selection)
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.subheader("Export files")
 
     # Submit button for exporting files
     if "show_secondary" not in cache:
@@ -63,9 +70,9 @@ def geo_data_process():
     # Response to export button click when no existing file found
     if not cache.show_secondary:
         st.button(
-            "Export files",
+            "Export to csv",
             on_click=on_main_click,
-            args=(data_exp, data_general_info, data_clin, geo_id),
+            type="primary",
         )
 
     # Response to export button click when existing file found
@@ -80,12 +87,10 @@ def geo_data_process():
             st.button(
                 "Yes",
                 on_click=on_yes_click,
-                args=(data_exp, data_general_info, data_clin, geo_id),
             )
         # Option No
         with col2:
             st.button("No", on_click=on_no_click)
-    st.write(cache)
 
 
 # def plotting():

@@ -46,7 +46,7 @@ def run_process(geo_id):
 async def save_csv(data, path, message):
     try:
         data.to_csv(path, index=False)
-        st.write(f"# ***CSV file of {message} saved to {path}")
+        st.success(f"CSV file of {message} saved to {path}")
     except Exception as e:
         st.write(f"Error: {e}")
 
@@ -67,13 +67,18 @@ async def export(data_exp, data_general_info, data_clin, geo_id):
             save_csv(data_general_info, f"{file_path}_generalinfo.csv", "general info"),
             save_csv(data_clin, f"{file_path}_clinical.csv", "clinical data"),
         )
-        st.success("Files exported!")
+    st.balloons()
 
 
 # Func to handle export click
-def on_main_click(data_exp, data_general_info, data_clin, geo_id):
+def on_main_click():
+    geo_id = cache.geo_id
     folder_path = f"{RESULT_PATH}/{geo_id}"
     if not os.path.exists(folder_path):
+        data_exp = cache.data_exp
+        data_general_info = cache.data_general_info
+        data_clin = cache.data_clin
+
         cache.show_secondary = False
         asyncio.run(export(data_exp, data_general_info, data_clin, geo_id))
     else:
@@ -81,7 +86,12 @@ def on_main_click(data_exp, data_general_info, data_clin, geo_id):
 
 
 # Func to handle yes click of export
-def on_yes_click(data_exp, data_general_info, data_clin, geo_id):
+def on_yes_click():
+    data_exp = cache.data_exp
+    data_general_info = cache.data_general_info
+    data_clin = cache.data_clin
+    geo_id = cache.geo_id
+
     cache.show_secondary = False
     asyncio.run(export(data_exp, data_general_info, data_clin, geo_id))
 
