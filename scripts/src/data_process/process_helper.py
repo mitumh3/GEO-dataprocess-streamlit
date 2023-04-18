@@ -1,9 +1,11 @@
+import math
 import os
 import ssl
 import urllib.request
 
 import numpy as np
 import pandas as pd
+import streamlit as st
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from GEOparse import utils as GEO
@@ -90,21 +92,44 @@ def extract_clinical_data(df):
 
     clinical_data.rename(columns=Renamer(), inplace=True)
 
+    # st.write(clinical_data)
+    # st.stop()
     # Remove single value columns and create sample general info table
     sample_general_info = {"Feature": [], "Info": []}
+
+    # First remove single value
+    sample_general_info, cleaned_clinical_data = move_single_value_to_general_table(
+        sample_general_info, clinical_data
+    )
+
+    # # Split values in cells with ": " and create new columns
+    cleaned_clinical_data = split_values(cleaned_clinical_data)
+
+    # Second remove single value
+    sample_general_info, cleaned_clinical_data = move_single_value_to_general_table(
+        sample_general_info, cleaned_clinical_data
+    )
+    return {"general": sample_general_info, "clinical": cleaned_clinical_data}
+
+
+def move_single_value_to_general_table(sample_general_info, clinical_data):
     column_take = []
     for col_idx, col_name in enumerate(clinical_data.columns):
-        if len(set(clinical_data.iloc[:, col_idx])) == 1:
+        unique_values = set(clinical_data.iloc[:, col_idx])
+        unique_values = {
+            x
+            for x in unique_values
+            if x is not None and (isinstance(x, str) or not math.isnan(x))
+        }
+        if col_name == "na":
+            print(unique_values)
+        if len(unique_values) == 1:
             sample_general_info["Feature"].append(clinical_data.columns[col_idx])
-            sample_general_info["Info"].append(list(set(clinical_data.iloc[:, col_idx])).pop())
+            sample_general_info["Info"].append(list(unique_values).pop())
         else:
             column_take.append(col_idx)
     cleaned_clinical_data = clinical_data.iloc[:, column_take]
-
-    # Split values in cells with ": " and create new columns
-    cleaned_clinical_data = split_values(cleaned_clinical_data)
-
-    return {"general": sample_general_info, "clinical": cleaned_clinical_data}
+    return sample_general_info, cleaned_clinical_data
 
 
 # Function to split values in cells with ":"
@@ -120,10 +145,14 @@ def split_values(data):
                 if len(set(new[0])) == 1:
                     new_feature[np.unique(new[0])[0]] = new[1]
                 else:
-                    print("Something wrong with separating string process at column: ", i)
+                    print(
+                        "Something wrong with separating string process at column: ", i
+                    )
             else:
                 column_take2.append(i)
-        new_feature = new_feature.rename(columns={col: col.lower() for col in new_feature.columns})
+        new_feature = new_feature.rename(
+            columns={col: col.lower() for col in new_feature.columns}
+        )
         df2 = df2[column_take2]
         try:
             index_no = df2.columns.get_loc("!sample_geo_accession")

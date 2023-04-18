@@ -1,12 +1,11 @@
 import streamlit as st
-from display_helper import *
 from main_helper import *
 from streamlit import session_state as cache
 
-# from plotting import *
+from .display_helper import *
 
 
-def geo_data_process():
+def layout():
     """
     Main cache:
     - button_GEO: summit button of accesion ID form

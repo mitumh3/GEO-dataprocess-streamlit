@@ -3,8 +3,8 @@ import os
 import re
 
 import streamlit as st
+from data_process.process_func import get_data, merge_data
 from dotenv import load_dotenv
-from process_func import get_data, merge_data
 from streamlit import session_state as cache
 
 load_dotenv()

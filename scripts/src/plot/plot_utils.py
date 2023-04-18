@@ -1,10 +1,18 @@
+import os
 from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+import streamlit as st
+from dotenv import load_dotenv
 from pandas import DataFrame
 from scipy.stats import zscore
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from streamlit import session_state as cache
+
+load_dotenv()
+RESULT_PATH = os.getenv("result_path")
+pd.options.mode.chained_assignment = None
 
 
 def match_column_with_expression_index(df_exp, df_clin):
@@ -47,7 +55,7 @@ def handle_binary_column(df, unique_values, column):
     df[column] = pd.to_numeric(df[column])
 
 
-def handle_numeric_column(df, column):
+def is_numeric_column(df, column):
     try:
         df[column] = pd.to_numeric(df[column])
         return True
@@ -55,7 +63,7 @@ def handle_numeric_column(df, column):
         return False
 
 
-def check_numeric_in_unclassified_column(df, column, threshold):
+def is_numeric_in_unclassified_column(df, column, threshold):
     non_num = []
     for i in df[column]:
         try:
@@ -75,7 +83,7 @@ def check_numeric_in_unclassified_column(df, column, threshold):
         return False
 
 
-def set_numeric_binary_data(df):
+def rename_numeric_binary_cols(df):
     binary_lst = []
     numeric_lst = []
     for col in df.columns:
@@ -90,12 +98,12 @@ def set_numeric_binary_data(df):
             df.rename(columns={col: f"binary_{col}"}, inplace=True)
 
         # Rename numeric column
-        elif handle_numeric_column(df, col):
+        elif is_numeric_column(df, col):
             numeric_lst.append(col)
             df.rename(columns={col: f"numeric_{col}"}, inplace=True)
 
         # Rename unclassified column
-        elif check_numeric_in_unclassified_column(df, col, threshold=0.1):
+        elif is_numeric_in_unclassified_column(df, col, threshold=0.1):
             numeric_lst.append(col)
             df.rename(columns={col: f"numeric_{col}"}, inplace=True)
         else:
@@ -119,7 +127,7 @@ class PlotData:
     gene_lst = None
 
     def clean_clinical(self):
-        self.clinical_data = set_numeric_binary_data(self.clinical_data)
+        self.clinical_data = rename_numeric_binary_cols(self.clinical_data)
 
     def clean_expression(self):
         self.gene_lst = self.expression_data.iloc[:, 0]
@@ -171,12 +179,14 @@ class PlotData:
         self.numeric_data = self.drop_and_return_column("numeric")
         self.info_data = self.drop_and_return_column("info")
 
-    def get_expression(self, num_rows: int = -1, normalize: bool = False):
+    def get_expression(self, num_rows: int = -1, scaler="Standard"):
         df = self.expression_data
-        if normalize == True:
+        if scaler == "Standard":
             scaler = StandardScaler()
-            df = pd.DataFrame(scaler.fit_transform(df.T), columns=df.index).T
-            # df = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
+        elif scaler == "Min Max":
+            scaler = MinMaxScaler()
+        df = pd.DataFrame(scaler.fit_transform(df.T), columns=df.index).T
+        # df = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
         if num_rows == -1:
             return df
         else:
@@ -188,4 +198,6 @@ class PlotData:
             for rownames in self.binary_data.index
             if rownames.endswith(label_name)
         ]
-        return self.binary_data.loc[label]
+        df_label = self.binary_data.loc[label]
+        df_label.rename(index={f"binary_{label_name}": label_name}, inplace=True)
+        return df_label

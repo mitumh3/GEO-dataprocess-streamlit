@@ -5,8 +5,9 @@ import os
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
-from process_helper import *
 from streamlit import session_state as cache
+
+from .process_helper import *
 
 load_dotenv()
 DATASET_PATH = os.getenv("dataset_path")
@@ -64,34 +65,35 @@ async def get_data(accession_id):
 
 # Main function to process data
 async def process(url1, file_name, file_prefix, loop):
-    url = f"{url1}{file_prefix}{file_name}"
-    filepath = f"{DATASET_PATH}/{file_name}"
-    # Download files
-    await loop.run_in_executor(None, download_file, url, filepath)
-    # Read files
-    with gzip.open(filepath, "rt") as f:
-        largest_column_count = max(len(line.split("\t")) for line in f)
-    column_names = [i for i in range(0, largest_column_count)]
+    with st.spinner(f"Processing {file_name}"):
+        url = f"{url1}{file_prefix}{file_name}"
+        filepath = f"{DATASET_PATH}/{file_name}"
+        # Download files
+        await loop.run_in_executor(None, download_file, url, filepath)
+        # Read files
+        with gzip.open(filepath, "rt") as f:
+            largest_column_count = max(len(line.split("\t")) for line in f)
+        column_names = [i for i in range(0, largest_column_count)]
 
-    # Read file as dataframe
-    df = pd.read_csv(
-        filepath,
-        compression="gzip",
-        header=None,
-        keep_default_na=True,
-        skip_blank_lines=False,
-        delimiter="\t",
-        quotechar='"',
-        on_bad_lines="skip",
-        names=column_names,
-        low_memory=False,
-    )
+        # Read file as dataframe
+        df = pd.read_csv(
+            filepath,
+            compression="gzip",
+            header=None,
+            keep_default_na=True,
+            skip_blank_lines=False,
+            delimiter="\t",
+            quotechar='"',
+            on_bad_lines="skip",
+            names=column_names,
+            low_memory=False,
+        )
 
-    check1 = df[df[0].str.contains("!series_matrix_table", na=False)]
-    if check1.empty:
-        data = {"filename": file_name, "extra": process_extra(df)}
-    else:
-        data = process_series_matrix(df)
+        check1 = df[df[0].str.contains("!series_matrix_table", na=False)]
+        if check1.empty:
+            data = {"filename": file_name, "extra": process_extra(df)}
+        else:
+            data = process_series_matrix(df)
     return data
 
 

@@ -1,18 +1,13 @@
+import data_process
+import plot
 import streamlit as st
-from geo_data_process import geo_data_process
-from heatmap_plot import heatmap_plot
-from streamlit import session_state as cache
 
 # Format page
-st.set_page_config(page_title="Process Data")
+st.set_page_config(page_title="Process Data", layout="wide")
 if __name__ == "__main__":
-    page_names_to_funcs = {
-        "Process Data": geo_data_process,
-        "Plot": heatmap_plot
-        # "Mapping Demo": mapping_demo,
-        # "DataFrame Demo": data_frame_demo
-    }
+    page_names_to_funcs = {"Process Data": data_process.layout, "Plot": plot.layout}
 
     demo_name = st.sidebar.selectbox("Choose tools", page_names_to_funcs.keys())
     page_names_to_funcs[demo_name]()
     # main()
+st.container()
