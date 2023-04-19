@@ -3,8 +3,8 @@ import streamlit as st
 from main_helper import RESULT_PATH, get_processed_dataset, start_page
 from streamlit import session_state as cache
 
+from .data_utils import PlotData
 from .plot_helper import Graph
-from .plot_utils import PlotData
 
 st.set_option("deprecation.showPyplotGlobalUse", False)
 
@@ -94,7 +94,10 @@ def layout():
         ## TEST OR FULL RUN
         st.radio(
             label="***Select run:***",
-            options=["full", "test"],
+            options=[
+                "test",
+                "full",
+            ],
             key="run",
             horizontal=True,
         )

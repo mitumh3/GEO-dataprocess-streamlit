@@ -99,11 +99,11 @@
                     "ylorrd"
                 ],
                 "Label pallete": [
+                    "amp",
                     "bluered",
                     "aggrnyl",
                     "agsunset",
                     "algae",
-                    "amp",
                     "armyrose",
                     "balance",
                     "blackbody",
@@ -238,6 +238,9 @@
                 "color": "black",
                 "height": "0.05",
                 "spacing": "0.02"
+            },
+            "slide_xaxis": {
+                "X-axis tick angle": [-90, 45, 90, 5]
             },
             "input_cbar_pos": {
                 "Cbar right": "50",

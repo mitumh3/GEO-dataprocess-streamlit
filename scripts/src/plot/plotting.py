@@ -53,9 +53,8 @@ def map_label_colors(label, label_color):
     return target_colors
 
 
-def heatmap_func(input_paras, df, df_label):
+def heatmap_func(input_paras, df, df_label, patient_id):
     """ """
-
     # Define the input parameters for the cluster map
     paras = input_paras
 
@@ -79,8 +78,8 @@ def heatmap_func(input_paras, df, df_label):
         index={old_label_name: paras["label_layout"]["Label title"]}, inplace=True
     )
     label_bar = go.Heatmap(
-        z=df_label.values,
-        x=df_label.columns,
+        z=df_label,
+        x=patient_id,
         y=df_label.index,
         colorscale=paras["para"]["Label pallete"],
         showscale=False,
@@ -90,8 +89,8 @@ def heatmap_func(input_paras, df, df_label):
 
     # Create heatmap
     heatmap = go.Heatmap(
-        z=df.values,
-        x=df.columns,
+        z=df,
+        x=patient_id,
         y=df.index,
         colorscale=paras["para"]["Graph pallete"],
         hoverongaps=False,
@@ -122,7 +121,7 @@ def heatmap_func(input_paras, df, df_label):
     fig.append_trace(label_bar, row=1, col=1)
     fig.append_trace(heatmap, row=2, col=1)
 
-    # Update figure layout
+    # # Update figure layout
     fig.update_layout(
         title=paras["plot_layout"]["Plot title"],
         xaxis2=dict(
@@ -136,6 +135,7 @@ def heatmap_func(input_paras, df, df_label):
                 family=paras["xaxis"]["tickfont"],
                 size=paras["xaxis"]["tickfontsize"],
             ),
+            tickangle=paras["xaxis"]["X-axis tick angle"],
         ),
         yaxis2=dict(
             title=y_title,
@@ -150,7 +150,10 @@ def heatmap_func(input_paras, df, df_label):
             ),
             autorange="reversed",
         ),
-        xaxis1=dict(showticklabels=False, ticks=""),
+        xaxis1=dict(
+            showticklabels=False,
+            ticks="",
+        ),
         yaxis1=dict(
             tickfont=dict(
                 family=paras["label_layout"]["Font"],

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+import streamlit as st
 from pandas import DataFrame
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 

@@ -68,20 +68,36 @@ class Graph:
             selection = self.check_input_para(selection)
             cache[self.OPT][sulfix][para_name] = selection
 
+    def display_slide_para(self, paras, sulfix):
+        columns = st.columns(len(paras))
+        for col, para_name in zip(columns, paras):
+            with col:
+                para_opts = paras[para_name]
+                selection = st.slider(
+                    f"***{para_name}***",
+                    min_value=para_opts[0],
+                    max_value=para_opts[2],
+                    value=para_opts[1],
+                    step=para_opts[3],
+                    key=f"{self.OPT}_{sulfix}_{para_name}",
+                )
+            selection = self.check_input_para(selection)
+            cache[self.OPT][sulfix][para_name] = selection
+
     def display_para(self, level):
-        # try:
         para_level_dict = self.PARA_DICT[level]
         for key, paras in para_level_dict.items():
             para_type, sulfix = key.split("_", maxsplit=1)
-            cache[self.OPT][sulfix] = {}
+            if sulfix not in cache[self.OPT]:
+                cache[self.OPT][sulfix] = {}
             if para_type == "select":
                 self.display_select_para(paras, sulfix)
             elif para_type == "input":
                 self.display_input_para(paras, sulfix)
             elif para_type == "check":
                 self.display_check_para(paras, sulfix)
-        # except:
-        #     pass
+            elif para_type == "slide":
+                self.display_slide_para(paras, sulfix)
 
     def check_input_para(self, value):
         if isinstance(value, list):
@@ -109,13 +125,28 @@ class Graph:
         for key, value in self.INPUT.items():
             if "Scale" in value:
                 scale = self.INPUT[key]["Scale"]
-
         # Get data
         df_z = data.get_expression(num_rows=num_rows, scaler=scale)
         df_label = cache.label
-
+        patient_id = data.patient_id
+        # st.write(df_z)
+        # st.write(df_label)
         # Draw plot
-        fig = heatmap_func(self.INPUT, df_z, df_label)
+        # First, let's transpose both dataframes so that patients are the rows
+        df_label = df_label.T
+        df_z = df_z.T
+        patient_id = patient_id.T
+        # Then, let's sort both dataframes based on "disease" column in df_1
+        df_label = df_label.sort_values(by=df_label.columns[0])
+        df_z = df_z.loc[df_label.index]
+        patient_id = patient_id.loc[df_label.index]
+
+        # Finally, let's transpose both dataframes back to their original shape
+        df_label = df_label.T
+        df_z = df_z.T
+        patient_id = patient_id.T
+        patient_id = list(patient_id.squeeze())
+        fig = heatmap_func(self.INPUT, df_z, df_label, patient_id)
 
         # Display plot
         st.plotly_chart(fig, use_container_width=True)
