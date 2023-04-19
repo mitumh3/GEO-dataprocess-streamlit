@@ -1,17 +1,10 @@
-import os
 from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
-import streamlit as st
-from dotenv import load_dotenv
 from pandas import DataFrame
-from scipy.stats import zscore
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from streamlit import session_state as cache
 
-load_dotenv()
-RESULT_PATH = os.getenv("result_path")
 pd.options.mode.chained_assignment = None
 
 
@@ -41,18 +34,29 @@ def handle_unknown_values(df, unique_values, col):
                 unique_values.remove(value)
         except Exception as e:
             pass
+        try:
+            unique_values.remove(np.NaN)
+        except:
+            pass
+        try:
+            unique_values.remove(None)
+        except:
+            pass
     return unique_values
 
 
 def handle_binary_column(df, unique_values, column):
-    first_value = unique_values[0]
-    if "no" in first_value or "negative" in first_value or "without" in first_value:
-        df[column][df[column] == first_value] = 0
-        df[column][df[column] == unique_values[1]] = 1
-    else:
-        df[column][df[column] == first_value] = 1
-        df[column][df[column] == unique_values[1]] = 0
-    df[column] = pd.to_numeric(df[column])
+    try:
+        first_value = unique_values[0]
+        if "no" in first_value or "negative" in first_value or "without" in first_value:
+            df[column][df[column] == first_value] = 0
+            df[column][df[column] == unique_values[1]] = 1
+        else:
+            df[column][df[column] == first_value] = 1
+            df[column][df[column] == unique_values[1]] = 0
+        df[column] = pd.to_numeric(df[column])
+    except:
+        pass
 
 
 def is_numeric_column(df, column):
@@ -92,6 +96,8 @@ def rename_numeric_binary_cols(df):
         unique_values = handle_unknown_values(df, unique_values, col)
 
         # Format binary value (1, 0) and rename binary column
+        if col == "braf.mutation":
+            print(unique_values)
         if len(unique_values) == 2:
             binary_lst.append(col)
             handle_binary_column(df, unique_values, col)
@@ -122,6 +128,7 @@ class PlotData:
     binary_data = None
     numeric_data = None
     info_data = None
+    labels = None
 
     expression_data: DataFrame
     gene_lst = None
@@ -178,6 +185,9 @@ class PlotData:
         self.binary_data = self.drop_and_return_column("binary")
         self.numeric_data = self.drop_and_return_column("numeric")
         self.info_data = self.drop_and_return_column("info")
+        self.labels = pd.concat(
+            [self.binary_data, self.numeric_data, self.info_data], axis=0
+        )
 
     def get_expression(self, num_rows: int = -1, scaler="Standard"):
         df = self.expression_data
@@ -192,12 +202,15 @@ class PlotData:
         else:
             return df.iloc[:num_rows, :]
 
+    def get_clinical(self):
+        df = self.clinical_data
+        return df
+
     def get_label(self, label_name: str = None):
-        label = [
-            rownames
-            for rownames in self.binary_data.index
-            if rownames.endswith(label_name)
-        ]
-        df_label = self.binary_data.loc[label]
-        df_label.rename(index={f"binary_{label_name}": label_name}, inplace=True)
+        # label = [
+        #     rownames for rownames in self.labels.index if rownames.endswith(label_name)
+        # ]
+        df_label = self.labels.loc[[label_name]]
+        new_name = label_name.split("_", maxsplit=1)[1]
+        df_label.rename(index={label_name: new_name}, inplace=True)
         return df_label

@@ -1,4 +1,5 @@
 import asyncio
+import csv
 import gzip
 import os
 
@@ -70,9 +71,12 @@ async def process(url1, file_name, file_prefix, loop):
         filepath = f"{DATASET_PATH}/{file_name}"
         # Download files
         await loop.run_in_executor(None, download_file, url, filepath)
-        # Read files
+        # Determine the largest number of columns
         with gzip.open(filepath, "rt") as f:
-            largest_column_count = max(len(line.split("\t")) for line in f)
+            reader = csv.reader(f, delimiter="\t")
+            largest_column_count = max(len(row) for row in reader)
+
+        # Create a list of column names
         column_names = [i for i in range(0, largest_column_count)]
 
         # Read file as dataframe
@@ -88,6 +92,15 @@ async def process(url1, file_name, file_prefix, loop):
             names=column_names,
             low_memory=False,
         )
+
+        # Display raw_data on tab1:
+        tab1 = cache.tab1
+        with tab1:
+            st.subheader(file_name)
+            try:
+                st.write(df)
+            except:
+                st.warning("File too large, cannot display")
 
         check1 = df[df[0].str.contains("!series_matrix_table", na=False)]
         if check1.empty:

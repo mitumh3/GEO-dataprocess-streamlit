@@ -12,15 +12,15 @@ RESULT_PATH = os.getenv("result_path")
 DATASET_PATH = os.getenv("dataset_path")
 
 
-# Func to get existing datasets
-def get_available_datasets():
+# Func to get existing datasets in dataset path:
+def get_available_datasets_zip():
     try:
         available_datasets = set(
-            word
+            name
             for file in os.listdir(DATASET_PATH)
             if file.endswith("_series_matrix.txt.gz")
-            for word in re.findall(r"[^\W_]+", file)
-            if word.startswith("GSE")
+            for name in re.findall(r"[^\W_]+", file)
+            if name.startswith("GSE")
         )
     except BaseException:
         available_datasets = ""
@@ -29,8 +29,18 @@ def get_available_datasets():
     return dataset_lst
 
 
+def get_processed_dataset():
+    try:
+        available_datasets = set(name for name in os.listdir(RESULT_PATH))
+    except BaseException:
+        available_datasets = ""
+    dataset_lst = list(available_datasets)
+    cache.available_datasets = available_datasets
+    return dataset_lst
+
+
 # Func to initiate processing data
-def run_process(geo_id):
+def run_processing(geo_id):
     data_exp, data_general_info, data_clin, data_extra, warn = asyncio.run(
         get_data(geo_id)
     )
@@ -147,3 +157,26 @@ def start_page(page_name, keep_cache_lst):
     if "current_page" not in cache:
         cache.current_page = ""
     delete_cache(keep_cache_lst)
+
+
+# def delete_cache(keep_lst=[]):
+#     # Delete all the items in Session state, except keep_lst
+#     for key in cache.keys():
+#         if key not in keep_lst:
+#             del cache[key]
+#         else:
+#             keep_lst.remove(key)
+#     print(keep_lst)
+#     for remaining_item in keep_lst:
+#         cache[remaining_item] = ""
+
+
+# def start_page(page_name, keep_cache_lst):
+#     cache.page = page_name
+#     if "current_page" not in cache:
+#         cache.current_page = ""
+
+#     keep_cache_lst.append("current_page")
+#     if cache.page != cache.current_page:
+#         cache.current_page = page_name
+#         delete_cache(keep_cache_lst)

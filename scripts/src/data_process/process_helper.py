@@ -121,8 +121,6 @@ def move_single_value_to_general_table(sample_general_info, clinical_data):
             for x in unique_values
             if x is not None and (isinstance(x, str) or not math.isnan(x))
         }
-        if col_name == "na":
-            print(unique_values)
         if len(unique_values) == 1:
             sample_general_info["Feature"].append(clinical_data.columns[col_idx])
             sample_general_info["Info"].append(list(unique_values).pop())

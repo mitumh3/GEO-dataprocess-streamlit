@@ -6,13 +6,23 @@ from streamlit import session_state as cache
 # Function to create submit button for ACCESSION ID input
 def submit_geo_id(dataset_lst):
     with st.form("GEO_form"):
-        geo_id = st.text_input("Enter GEO Accession ID here:")
+        id_input = st.text_input("Enter GEO Accession ID here:")
+
+        dataset_lst.insert(0, None)
+        with st.expander("Or choose existing datasets:"):
+            id_radio = st.radio(
+                label="Dataset choices",
+                options=dataset_lst,
+                horizontal=True,
+                label_visibility="collapsed",
+            )
+        if id_radio != None:
+            geo_id = id_radio
+        else:
+            geo_id = id_input
+
         cache.geo_id = geo_id
         submit_button_geo = st.form_submit_button(label="Submit")
-
-        dataset_str = " | ".join(dataset_lst)
-        st.write(">>>>> Dataset(s) found in your folder:")
-        st.write(dataset_str)
     return geo_id, submit_button_geo
 
 
