@@ -45,18 +45,28 @@ def handle_unknown_values(df, unique_values, col):
     return unique_values
 
 
-def handle_binary_column(df, unique_values, column):
+def handle_binary_column(df, unique_values, column, denote_log):
     try:
-        first_value = unique_values[0]
+        first_value, sec_value = unique_values
         if "no" in first_value or "negative" in first_value or "without" in first_value:
             df[column][df[column] == first_value] = 0
-            df[column][df[column] == unique_values[1]] = 1
+            df[column][df[column] == sec_value] = 1
+            denote_log[column] = {
+                0: first_value,
+                1: sec_value,
+            }
         else:
             df[column][df[column] == first_value] = 1
-            df[column][df[column] == unique_values[1]] = 0
+            df[column][df[column] == sec_value] = 0
+            denote_log[column] = {
+                0: sec_value,
+                1: first_value,
+            }
+
         df[column] = pd.to_numeric(df[column])
     except:
         pass
+    return denote_log
 
 
 def is_numeric_column(df, column):
@@ -90,17 +100,18 @@ def is_numeric_in_unclassified_column(df, column, threshold):
 def rename_numeric_binary_cols(df):
     binary_lst = []
     numeric_lst = []
+    denote_log = {}
     for col in df.columns:
+        # Define unique_values of a column
         unique_values = list(set(df[col]))
+
         # Format unknown value
         unique_values = handle_unknown_values(df, unique_values, col)
 
         # Format binary value (1, 0) and rename binary column
-        if col == "braf.mutation":
-            print(unique_values)
         if len(unique_values) == 2:
             binary_lst.append(col)
-            handle_binary_column(df, unique_values, col)
+            denote_log = handle_binary_column(df, unique_values, col, denote_log)
             df.rename(columns={col: f"binary_{col}"}, inplace=True)
 
         # Rename numeric column
@@ -116,7 +127,7 @@ def rename_numeric_binary_cols(df):
             df.rename(columns={col: f"info_{col}"}, inplace=True)
             # df = df.drop(columns=col)
     df = df.sort_index(axis=1)
-    return df
+    return df, denote_log
 
 
 @dataclass
@@ -133,8 +144,11 @@ class PlotData:
     expression_data: DataFrame
     gene_lst = None
 
+    denote_log = None
+
     def clean_clinical(self):
-        self.clinical_data = rename_numeric_binary_cols(self.clinical_data)
+        self.clinical_data, denote_log = rename_numeric_binary_cols(self.clinical_data)
+        self.denote_log = pd.DataFrame(denote_log).T
 
     def clean_expression(self):
         self.gene_lst = self.expression_data.iloc[:, 0]
@@ -201,10 +215,6 @@ class PlotData:
             return df
         else:
             return df.iloc[:num_rows, :]
-
-    def get_clinical(self):
-        df = self.clinical_data
-        return df
 
     def get_label(self, label_name: str = None):
         # label = [

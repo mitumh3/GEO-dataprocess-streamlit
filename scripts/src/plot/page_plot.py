@@ -65,9 +65,13 @@ def layout():
     tab1, tab2 = st.tabs(["Plot", "Preview data"])
 
     with tab2:
-        num_rows, num_cols = data.get_clinical().shape
+        num_rows, num_cols = data.clinical_data.shape
+        st.subheader("Processed clinical data")
         st.write(num_rows, " samples with ", num_cols, " features")
-        st.write(data.get_clinical())
+        st.write(data.clinical_data)
+
+        st.subheader("Denote table")
+        st.write(data.denote_log)
 
     with tab1:
         ## OPTIONS OF PLOT TYPES
