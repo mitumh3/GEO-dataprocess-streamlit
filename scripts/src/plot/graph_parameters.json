@@ -231,18 +231,19 @@
                 "tickfont": "Arial",
                 "tickfontsize": "10"
             },
+            "input_label_layout": {
+                "Label title": "",
+                "Font": "Arial",
+                "Size": "12",
+                "color": "black",
+                "height": "0.05",
+                "spacing": "0.02"
+            },
             "input_cbar_pos": {
                 "Cbar right": "50",
                 "Cbar width": "20",
                 "Cbar height": "0.5",
                 "outlinewidth": "0"
-            },
-            "input_label_layout": {
-                "Label font": "Arial",
-                "Size": "12",
-                "color": "black",
-                "height": "0.05",
-                "spacing": "0.02"
             }
         }
     },

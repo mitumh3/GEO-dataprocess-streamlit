@@ -53,7 +53,7 @@ def map_label_colors(label, label_color):
     return target_colors
 
 
-def heatmap_func(input_paras, df):
+def heatmap_func(input_paras, df, df_label):
     """ """
 
     # Define the input parameters for the cluster map
@@ -74,10 +74,14 @@ def heatmap_func(input_paras, df):
     )
 
     # Create a bar for labeling
+    old_label_name = df_label.index.values[0]
+    df_label.rename(
+        index={old_label_name: paras["label_layout"]["Label title"]}, inplace=True
+    )
     label_bar = go.Heatmap(
-        z=paras["label"].values,
-        x=paras["label"].columns,
-        y=paras["label"].index,
+        z=df_label.values,
+        x=df_label.columns,
+        y=df_label.index,
         colorscale=paras["para"]["Label pallete"],
         showscale=False,
         hovertemplate=f"Label: %{{z}}<br>{x_title}: %{{x}}",
@@ -146,9 +150,10 @@ def heatmap_func(input_paras, df):
             ),
             autorange="reversed",
         ),
+        xaxis1=dict(showticklabels=False, ticks=""),
         yaxis1=dict(
             tickfont=dict(
-                family=paras["label_layout"]["Label font"],
+                family=paras["label_layout"]["Font"],
                 size=paras["label_layout"]["Size"],
             ),
         ),

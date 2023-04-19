@@ -216,11 +216,8 @@ class PlotData:
         else:
             return df.iloc[:num_rows, :]
 
-    def get_label(self, label_name: str = None):
-        # label = [
-        #     rownames for rownames in self.labels.index if rownames.endswith(label_name)
-        # ]
+    def get_label(self, label_name: str, new_label_name=None):
         df_label = self.labels.loc[[label_name]]
-        new_name = label_name.split("_", maxsplit=1)[1]
-        df_label.rename(index={label_name: new_name}, inplace=True)
+        if new_label_name != None:
+            df_label.rename(index={label_name: new_label_name}, inplace=True)
         return df_label

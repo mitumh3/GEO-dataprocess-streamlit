@@ -53,12 +53,13 @@ def layout():
     if "processed" not in cache:
         cache.processed = False
     if cache.processed != geo_id:
-        data_clin = pd.read_csv(f"{RESULT_PATH}/{geo_id}/{geo_id}_clinical.csv")
-        data_exp = pd.read_csv(f"{RESULT_PATH}/{geo_id}/{geo_id}_expression.csv")
-        data = PlotData(data_clin, data_exp)
-        data.generate_data()
-        cache.data = data
-        cache.processed = geo_id
+        with st.spinner(f"Loading dataset {geo_id}..."):
+            data_clin = pd.read_csv(f"{RESULT_PATH}/{geo_id}/{geo_id}_clinical.csv")
+            data_exp = pd.read_csv(f"{RESULT_PATH}/{geo_id}/{geo_id}_expression.csv")
+            data = PlotData(data_clin, data_exp)
+            data.generate_data()
+            cache.data = data
+            cache.processed = geo_id
     # Load data for plotting
     data = cache.data
 
@@ -89,7 +90,6 @@ def layout():
         if "graph_opt" not in cache:
             st.stop()
         cache[cache.graph_opt] = {}
-        graph.set_para()
 
         ## TEST OR FULL RUN
         st.radio(
@@ -115,9 +115,17 @@ def layout():
         # SELECT LABEL:
         st.subheader("Select label")
         label_lst = [x for x in data.labels.index]
-        label = st.selectbox("Choose label", label_lst, label_visibility="collapsed")
-        cache.label = data.get_label(label)
+        label_title = st.selectbox(
+            "Choose label", label_lst, label_visibility="collapsed"
+        )
+
+        new_label_title = label_title.split("_", maxsplit=1)[1]
+        cache.label_title = new_label_title
+        cache.label = data.get_label(label_title, new_label_title)
+        graph.set_para()
+
         ## PARAMETERS OF THE CHOSEN PLOT
+        # Load paras
         st.subheader("Set parameters:")
 
         # Create form

@@ -9,17 +9,25 @@ from .plotting import heatmap_func
 
 @dataclass
 class Graph:
-    OPTIONS = ["Heatmap", "Bar Plot", "ROC"]
+    OPTIONS = None
     OPT = None
     GRAPH_DICT = None
     PARA_DICT = None
     INPUT = {}
+    ROW_TAKE = None
+
+    def __init__(self):
+        with open("scripts/src/plot/graph_parameters.json", mode="r") as f:
+            self.GRAPH_DICT = json.load(f)
+        self.OPTIONS = self.GRAPH_DICT.keys()
 
     def set_para(self):
         self.OPT = cache.graph_opt
-        with open("scripts/src/plot/graph_parameters.json", mode="r") as f:
-            self.GRAPH_DICT = json.load(f)
         self.PARA_DICT = self.GRAPH_DICT[self.OPT]
+        if self.OPT == "Heatmap":
+            self.PARA_DICT["advanced"]["input_label_layout"][
+                "Label title"
+            ] = cache.label_title
 
     def display_select_para(self, paras, sulfix):
         columns = st.columns(len(paras))
@@ -90,22 +98,24 @@ class Graph:
     def load_input_paras(self):
         self.INPUT = cache[self.OPT]
         if cache.run == "test":
-            self.INPUT["num_rows"] = int(cache.num_rows)
+            self.ROW_TAKE = int(cache.num_rows)
         else:
-            self.INPUT["num_rows"] = -1
-
-        self.INPUT["label"] = cache.label
-
+            self.ROW_TAKE = -1
         return self.INPUT
 
     def draw_graph(self, data):
-        num_rows = self.INPUT.pop("num_rows")
+        # Get num_rows and scale for getting data
+        num_rows = self.ROW_TAKE
         for key, value in self.INPUT.items():
             if "Scale" in value:
-                scale = self.INPUT[key].pop("Scale")
-        df = data.get_expression(num_rows=num_rows, scaler=scale)
-        fig = heatmap_func(
-            self.INPUT,
-            df,
-        )
+                scale = self.INPUT[key]["Scale"]
+
+        # Get data
+        df_z = data.get_expression(num_rows=num_rows, scaler=scale)
+        df_label = cache.label
+
+        # Draw plot
+        fig = heatmap_func(self.INPUT, df_z, df_label)
+
+        # Display plot
         st.plotly_chart(fig, use_container_width=True)
