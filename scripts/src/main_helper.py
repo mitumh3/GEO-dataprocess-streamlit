@@ -135,7 +135,6 @@ def handle_extra(data_extra, data_exp, data_clin):
 
         ## Action when submit button is clicked
         else:
-            # st.write(data_extra)
             merge_data(data_extra, data_exp, data_clin)
             st.experimental_rerun()
 

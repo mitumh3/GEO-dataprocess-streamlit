@@ -127,26 +127,26 @@ def process_extra(df_extra):
 
 
 # Function to merge unused file with existing data - expression data or clinical data
-def merge_data(data_extra, exp_data, clin_data):
+def merge_data(data_extra, data_exp, data_clin):
     for i in range(len(data_extra)):
         file_name = list(data_extra)[0]
         if cache[file_name] == "Expression data":
-            exp_data = pd.concat([exp_data, data_extra.pop(file_name)])
-            exp_data.index.name = None
-            exp_data = exp_data.dropna(how="all")
-            exp_data = exp_data.reset_index(drop=True)
-            # exp_data = exp_data.set_index(exp_data.columns[0])
-            cache.exp_data = exp_data
+            data_exp = pd.concat([data_exp, data_extra.pop(file_name)])
+            data_exp.index.name = None
+            data_exp = data_exp.dropna(how="all")
+            data_exp = data_exp.reset_index(drop=True)
+            # data_exp = data_exp.set_index(data_exp.columns[0])
+            cache.data_exp = data_exp
             cache.extra = data_extra
         elif cache[file_name] == "Clinical data":
             clinical_extra = data_extra.pop(file_name)
 
             # Merge clinical data
             maxcheck2 = {}
-            for old_column in clin_data.columns:
+            for old_column in data_clin.columns:
                 for extra_column in clinical_extra.columns:
-                    check2 = clin_data[
-                        clin_data[old_column].isin(clinical_extra[extra_column])
+                    check2 = data_clin[
+                        data_clin[old_column].isin(clinical_extra[extra_column])
                     ][old_column]
                     check2 = check2.dropna()
                     if len(check2) != 0:
@@ -157,9 +157,9 @@ def merge_data(data_extra, exp_data, clin_data):
                             col_2 = extra_column
             st.write(old_column, extra_column)
             clinical = pd.merge(
-                clin_data, clinical_extra, left_on=col_1, right_on=col_2, how="inner"
+                data_clin, clinical_extra, left_on=col_1, right_on=col_2, how="inner"
             )
-            cache.clin_data = clinical
+            cache.data_clin = clinical
             cache.extra = data_extra
         else:
             data_extra.pop(file_name)

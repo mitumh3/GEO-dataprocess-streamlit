@@ -52,7 +52,7 @@ def layout():
         handle_extra(data_extra, data_exp, data_clin)
 
         # Display data and selection of clinical data
-        display_exp_and_extra(data_exp, data_general_info)
+        display_exp_and_info(data_exp, data_general_info)
 
         columns = data_clin.columns
         feature_selection = display_column_selection(columns)
@@ -85,7 +85,11 @@ def layout():
                 st.button(
                     "Yes",
                     on_click=on_yes_click,
+                    use_container_width=True,
+                    type="secondary",
                 )
             # Option No
             with col2:
-                st.button("No", on_click=on_no_click)
+                st.button(
+                    "No", on_click=on_no_click, use_container_width=True, type="primary"
+                )

@@ -27,7 +27,7 @@ def submit_geo_id(dataset_lst):
 
 
 # Function to display data
-def display_exp_and_extra(data_exp, data_general_info):
+def display_exp_and_info(data_exp, data_general_info):
     num_rows1, num_cols1 = data_exp.shape
     num_rows2 = data_general_info.shape[0]
     col1, col2 = st.columns(2)
@@ -36,7 +36,7 @@ def display_exp_and_extra(data_exp, data_general_info):
         st.write(num_rows2, " pieces of information")
         st.write(data_general_info)
     with col2:
-        st.subheader("Expression Data Review")
+        st.subheader("Expression Data Preview")
         st.write(num_cols1 - 1, " samples with ", num_rows1, " genes")
         st.write(data_exp.head())
 
