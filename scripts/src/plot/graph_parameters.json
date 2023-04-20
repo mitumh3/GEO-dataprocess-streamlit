@@ -237,7 +237,7 @@
                 "Font": "Roboto, sans-serif",
                 "Size": "12",
                 "color": "#31333F",
-                "height": "0.05",
+                "height": "0.01",
                 "spacing": "0.02"
             },
             "slide_xaxis": {
@@ -248,7 +248,8 @@
                 "Cbar width": "20",
                 "Cbar height": "0.5",
                 "outlinewidth": "0"
-            }
+            },
+            "code_custom": {"*Custom codes (For developers)":""}
         }
     },
     "Bar Plot": {},

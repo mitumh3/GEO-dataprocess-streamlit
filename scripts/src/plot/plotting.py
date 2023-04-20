@@ -31,7 +31,7 @@ def pca_2d(df_exp, df_label, label_title, patient_id):
     df_pca["id"] = patient_id.T["index"]
     df_pca[label_title] = df_label.T[label_title]
     try:
-        df_pca[label_title] = df_pca[label_title].astype(str)
+        df_pca[label_title] = df_pca[label_title].astype("category")
     except:
         pass
     # Plot the PCA results using Plotly
@@ -41,8 +41,8 @@ def pca_2d(df_exp, df_label, label_title, patient_id):
             df_pca,
             x="PC1",
             y="PC2",
-            color=label_title,
-            # symbol=label_title,
+            color=label_title[0],
+            # symbol=label_title[1],
             opacity=0.7,
             color_discrete_sequence=px.colors.qualitative.D3,
             marginal_x="box",  # display distribution marginal on x-axis
@@ -82,7 +82,7 @@ def pca_2d(df_exp, df_label, label_title, patient_id):
         ),
         legend=dict(
             title=dict(
-                text=label_title,
+                text=label_title[0],
                 font=dict(size=14, color="#31333F"),
             ),
         ),
@@ -116,7 +116,7 @@ def pca_3d(df_exp, df_label, label_title, patient_id):
     df_pca["id"] = patient_id.T["index"]
     df_pca[label_title] = df_label.T[label_title]
     try:
-        df_pca[label_title] = df_pca[label_title].astype(str)
+        df_pca[label_title] = df_pca[label_title].astype("catergory")
     except:
         pass
 
@@ -125,9 +125,9 @@ def pca_3d(df_exp, df_label, label_title, patient_id):
         x="PC1",
         y="PC2",
         z="PC3",
-        color=label_title,
+        color=label_title[0],
         opacity=0.8,
-        # symbol=label_title,
+        # symbol=label_title[1],
         color_discrete_sequence=px.colors.qualitative.D3,
         hover_name="id",
     )
@@ -146,7 +146,7 @@ def pca_3d(df_exp, df_label, label_title, patient_id):
         hovermode="closest",
         legend=dict(
             title=dict(
-                text=label_title,
+                text=label_title[0],
                 font=dict(size=14, color="#31333F"),
             ),
         ),
@@ -288,28 +288,34 @@ def heatmap_func(input_paras, df, df_label, patient_id):
     cbar_title = paras["cbar_layout"]["Cbar title"]
 
     # Define cols and rows of figure
+    num_rows = df_label.shape[0] + 1
+    row_heights = [label_height for i in range(df_label.shape[0])]
+    row_heights.append(1 - sum(row_heights))
     fig = make_subplots(
-        rows=2,
+        rows=num_rows,
         cols=1,
         column_widths=[0.9],
-        row_heights=[label_height, 1 - label_height],
+        row_heights=row_heights,
         vertical_spacing=paras["label_layout"]["spacing"],
+        shared_xaxes=True,
     )
 
     # Create a bar for labeling
-    old_label_name = df_label.index.values[0]
-    df_label.rename(
-        index={old_label_name: paras["label_layout"]["Label title"]}, inplace=True
-    )
-    label_bar = go.Heatmap(
-        z=df_label,
-        x=patient_id,
-        y=df_label.index,
-        colorscale=paras["para"]["Label pallete"],
-        showscale=False,
-        hovertemplate=f"Label: %{{z}}<br>{x_title}: %{{x}}",
-        name="",
-    )
+    new_name_lst = eval(paras["label_layout"]["Label title"])
+    for old_name, new_name in zip(list(df_label.index.values), new_name_lst):
+        df_label.rename(index={old_name: new_name}, inplace=True)
+    for i, name in enumerate(reversed(df_label.index)):
+        df_subset_label = df_label.loc[[name]]
+        label_bar = go.Heatmap(
+            z=df_subset_label,
+            x=patient_id,
+            y=df_subset_label.index,
+            colorscale=paras["para"]["Label pallete"],
+            showscale=False,
+            hovertemplate=f"Label: %{{z}}<br>{x_title}: %{{x}}",
+            name="",
+        )
+        fig.append_trace(label_bar, row=i + 1, col=1)
 
     # Create heatmap
     heatmap = go.Heatmap(
@@ -342,8 +348,8 @@ def heatmap_func(input_paras, df, df_label, patient_id):
     )
 
     # Add label bar and heatmap to figure
-    fig.append_trace(label_bar, row=1, col=1)
-    fig.append_trace(heatmap, row=2, col=1)
+    # fig.append_trace(label_bar, row=1, col=1)
+    fig.append_trace(heatmap, row=num_rows, col=1)
 
     # # Update figure layout
     fig.update_layout(
@@ -352,42 +358,47 @@ def heatmap_func(input_paras, df, df_label, patient_id):
         margin=dict(t=100, b=20, l=10, r=10),
         height=paras["plot_layout"]["Fig height"],
         width=paras["plot_layout"]["Fig width"],
-        xaxis2=dict(
-            title=x_title,
-            titlefont=dict(
-                family=paras["xaxis"]["Font"],
-                size=paras["xaxis"]["Size"],
-                color=paras["xaxis"]["color"],
-            ),
-            tickfont=dict(
-                family=paras["xaxis"]["tickfont"],
-                size=paras["xaxis"]["tickfontsize"],
-            ),
-            tickangle=paras["xaxis"]["X-axis tick angle"],
+    )
+
+    # Main xaxis layout
+    fig.layout[f"xaxis{num_rows}"].update(
+        title=x_title,
+        titlefont=dict(
+            family=paras["xaxis"]["Font"],
+            size=paras["xaxis"]["Size"],
+            color=paras["xaxis"]["color"],
         ),
-        yaxis2=dict(
-            title=y_title,
-            titlefont=dict(
-                family=paras["yaxis"]["Font"],
-                size=paras["yaxis"]["Size"],
-                color=paras["yaxis"]["color"],
-            ),
-            tickfont=dict(
-                family=paras["yaxis"]["tickfont"],
-                size=paras["yaxis"]["tickfontsize"],
-            ),
-            autorange="reversed",
+        tickfont=dict(
+            family=paras["xaxis"]["tickfont"],
+            size=paras["xaxis"]["tickfontsize"],
         ),
-        xaxis1=dict(
-            showticklabels=False,
-            ticks="",
+        tickangle=paras["xaxis"]["X-axis tick angle"],
+    )
+
+    # Main yaxis layout
+    fig.layout[f"yaxis{num_rows}"].update(
+        title=y_title,
+        titlefont=dict(
+            family=paras["yaxis"]["Font"],
+            size=paras["yaxis"]["Size"],
+            color=paras["yaxis"]["color"],
         ),
-        yaxis1=dict(
+        tickfont=dict(
+            family=paras["yaxis"]["tickfont"],
+            size=paras["yaxis"]["tickfontsize"],
+        ),
+        autorange="reversed",
+    )
+
+    # Label y axes layout
+    label_yaxes = [fig.layout[f"yaxis{e}"] for e in range(1, num_rows)]
+    for yaxis in label_yaxes:
+        yaxis.update(
             tickfont=dict(
                 family=paras["label_layout"]["Font"],
                 size=paras["label_layout"]["Size"],
-            ),
-        ),
-    )
-
+                color=paras["label_layout"]["color"],
+            )
+        )
+    eval(paras["custom"]["*Custom codes (For developers)"])
     return fig

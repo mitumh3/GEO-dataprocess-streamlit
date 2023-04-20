@@ -139,13 +139,11 @@ def sort_by_label(df_z, df_label, patient_id):
     patient_id = patient_id.T
 
     # Sort df_sort based on values in df_label and patient_id
-    df_sort = df_label.merge(patient_id, left_index=True, right_index=True)
-    df_sort = df_sort.sort_values(by=[df_label.columns[0], patient_id.columns[0]])
+    df_label.sort_values(by=list(df_label.columns.values), inplace=True)
 
     # Sort dataframes based on values in df_sort
-    df_label = df_label.loc[df_sort.index]
-    df_z = df_z.loc[df_sort.index]
-    patient_id = patient_id.loc[df_sort.index]
+    df_z = df_z.loc[df_label.index]
+    patient_id = patient_id.loc[df_label.index]
 
     # Transpose dataframes back to their original shape
     df_label = df_label.T
@@ -228,20 +226,24 @@ class PlotData:
             [self.binary_data, self.numeric_data, self.info_data], axis=0
         )
 
-    def get_expression(self, num_rows: int = -1, scaler="Standard"):
+    def get_expression(self, row_take=-1, scaler="Standard"):
         df = self.expression_data
         if scaler == "Standard":
             scaler = StandardScaler()
         elif scaler == "Min Max":
             scaler = MinMaxScaler()
         df = pd.DataFrame(scaler.fit_transform(df.T), columns=df.index).T
-        if num_rows == -1:
-            return df
-        else:
-            return df.iloc[:num_rows, :]
 
-    def get_label(self, label_name: str, new_label_name=None):
-        df_label = self.labels.loc[[label_name]]
-        if new_label_name != None:
-            df_label.rename(index={label_name: new_label_name}, inplace=True)
+        if row_take == -1:
+            return df
+        elif isinstance(row_take, int):
+            return df.iloc[:row_take, :]
+        elif isinstance(row_take, list):
+            return df.loc[row_take]
+
+    def get_label(self, label_name_lst: str, new_label_name_lst=None):
+        df_label = self.labels.loc[label_name_lst]
+        for label_name, new_label_name in zip(label_name_lst, new_label_name_lst):
+            if new_label_name != None:
+                df_label.rename(index={label_name: new_label_name}, inplace=True)
         return df_label

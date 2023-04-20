@@ -4,7 +4,7 @@ from main_helper import RESULT_PATH, get_processed_dataset, start_page
 from streamlit import session_state as cache
 
 from .data_utils import PlotData
-from .plot_helper import Graph, disply_save_button, draw_graph
+from .plot_helper import Graph, display_run_type, disply_save_button, draw_graph
 
 st.set_option("deprecation.showPyplotGlobalUse", False)
 
@@ -65,11 +65,13 @@ def layout():
         # SELECT LABEL:
         # st.subheader("Select label")
         label_lst = [x for x in data.labels.index]
-        label_title = st.selectbox("***Select label:***", label_lst)
+        label_title = st.multiselect("***Select label:***", label_lst)
 
-        new_label_title = label_title.split("_", maxsplit=1)[1]
-        cache.label_title = new_label_title
+        new_label_title = [
+            old_label.split("_", maxsplit=1)[1] for old_label in label_title
+        ]
         cache.label = data.get_label(label_title, new_label_title)
+        cache.label_title = new_label_title
 
     tab1, tab2, tab3 = st.tabs(["Plot", "Preview data", "PCA"])
 
@@ -83,12 +85,14 @@ def layout():
         st.write(data.denote_log)
 
     with tab3:
-        dimension = st.select_slider("Choose dimension number:", options=[2, 3, "all"])
+        dimension = st.select_slider(
+            "***Choose dimension number:***", options=[2, 3, "all"]
+        )
         with st.expander("***Result:***", expanded=True):
             pca_output = graph.draw_pca(data, dimension)
-        disply_save_button(
-            pca_output, "save_pca", f"pca{dimension}d_{cache.label_title}"
-        )
+
+        sulfix = "-".join(cache.label_title)
+        disply_save_button(pca_output, "save_pca", f"pca{dimension}d_{sulfix}")
     with tab1:
         ## OPTIONS OF PLOT TYPES
         # Create radio select
@@ -106,25 +110,6 @@ def layout():
             st.stop()
         cache[cache.graph_opt] = {}
 
-        ## TEST OR FULL RUN
-        st.radio(
-            label="***Select run:***",
-            options=[
-                "test",
-                "full",
-            ],
-            key="run",
-            horizontal=True,
-        )
-        if cache.run == "test":
-            st.text_input(
-                label="Number of rows",
-                label_visibility="collapsed",
-                value="10",
-                placeholder="Number of rows taken for test",
-                key="num_rows",
-            )
-
         st.write(
             f"\n<h1 style='text-align: center;'> {cache.geo_id} - {cache.graph_opt} </h1>\n",
             unsafe_allow_html=True,
@@ -138,6 +123,7 @@ def layout():
 
         # Create form
         with st.form("graph_para"):
+            display_run_type(data.gene_lst)
             graph.display_para("simple")
 
             with st.expander("Advanced settings"):
@@ -155,6 +141,5 @@ def layout():
             with st.spinner("Drawing..."):
                 # Draw
                 output = draw_graph(cache.df_z, cache.input)
-        disply_save_button(
-            output, f"save_{graph.OPT}", f"{graph.OPT}_{cache.label_title}"
-        )
+        sulfix = "-".join(cache.label_title)
+        disply_save_button(output, f"save_{graph.OPT}", f"{graph.OPT}_{sulfix}")

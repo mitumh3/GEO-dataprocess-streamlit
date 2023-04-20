@@ -32,7 +32,7 @@ class Graph:
         self.OPTIONS = self.GRAPH_DICT.keys()
 
     def draw_pca(self, data, dimension):
-        df_exp = data.get_expression(num_rows=-1)
+        df_exp = data.get_expression()
         patient_id = data.patient_id
 
         if dimension == 2:
@@ -124,6 +124,8 @@ class Graph:
                 self.display_check_para(paras, sulfix)
             elif para_type == "slide":
                 self.display_slide_para(paras, sulfix)
+            elif para_type == "code":
+                self.display_input_para(paras, sulfix)
 
     def check_input_para(self, value):
         if isinstance(value, list):
@@ -141,11 +143,12 @@ class Graph:
         self.INPUT = cache[self.OPT]
         if cache.run == "test":
             self.ROW_TAKE = int(cache.num_rows)
+        elif cache.run == "target":
+            self.ROW_TAKE = cache.target
         else:
             self.ROW_TAKE = -1
 
         # Get num_rows and scale for getting data
-        num_rows = self.ROW_TAKE
         for key, value in self.INPUT.items():
             if "Scale" in value:
                 scale = self.INPUT[key]["Scale"]
@@ -153,28 +156,57 @@ class Graph:
                 label_cluster = self.INPUT[key]["Label cluster"]
 
         # Get data
-        self.DF_Z = data.get_expression(num_rows=num_rows, scaler=scale)
+        self.DF_Z = data.get_expression(row_take=self.ROW_TAKE, scaler=scale)
         self.DF_LABEL = cache.label
         self.ID = data.patient_id
 
         # Cluster by labels
-        try:
-            if label_cluster:
-                self.DF_Z, self.DF_LABEL, self.ID = sort_by_label(
-                    self.DF_Z, self.DF_LABEL, self.ID
-                )
-        except:
-            pass
+        # try:
+        if label_cluster:
+            self.DF_Z, self.DF_LABEL, self.ID = sort_by_label(
+                self.DF_Z, self.DF_LABEL, self.ID
+            )
+        # except:
+        #     pass
         self.ID = list(self.ID.squeeze())
 
         # Caching input
         cache.input = {
             "parameters": self.INPUT,
-            "row_take": num_rows,
+            "row_take": self.ROW_TAKE,
             "df_label": self.DF_LABEL,
             "id": self.ID,
         }
         cache.df_z = self.DF_Z
+
+
+def display_run_type(gene_lst):
+    ## TEST OR FULL RUN
+    st.radio(
+        label="***Select run type:***",
+        options=[
+            "test",
+            "full",
+            "target",
+        ],
+        key="run",
+        horizontal=True,
+    )
+    if cache.run == "test":
+        st.text_input(
+            label="Number of rows",
+            label_visibility="collapsed",
+            value="10",
+            placeholder="Number of rows taken for test",
+            key="num_rows",
+        )
+    elif cache.run == "target":
+        st.multiselect(
+            label="Target",
+            label_visibility="collapsed",
+            options=gene_lst,
+            key="target",
+        )
 
 
 @st.cache_data
@@ -206,6 +238,8 @@ def disply_save_button(fig, key, name):
             label_visibility="collapsed",
         )
     with col2:
-        save_button = st.button("Save as pdf", key=key, use_container_width=True)
+        save_button = st.button(
+            "Save as pdf", key=key, use_container_width=True, type="primary"
+        )
     if save_button:
         fig.write_image(f"{file_path}/{file_name}.pdf", format="pdf")
