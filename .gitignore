@@ -6,3 +6,4 @@ dataset
 processed_data
 **/test.py
 **/.DS_Store
+**/figures

@@ -202,41 +202,41 @@
         "advanced": {
             "input_plot_layout": {
                 "Plot title": "Heatmap",
-                "Font": "Arial",
+                "Font": "Roboto, sans-serif",
                 "Size": "16",
-                "color": "black",
+                "color": "#31333F",
                 "Fig width": "1000",
                 "Fig height": "700"
             },
             "input_xaxis": {
                 "X-axis title": "Patient",
-                "Font": "Arial",
+                "Font": "Roboto, sans-serif",
                 "Size": "16",
-                "color": "black",
-                "tickfont": "Arial",
+                "color": "#31333F",
+                "tickfont": "Roboto, sans-serif",
                 "tickfontsize": "12"
             },
             "input_yaxis": {
                 "Y-axis title": "Gene",
-                "Font": "Arial",
+                "Font": "Roboto, sans-serif",
                 "Size": "16",
-                "color": "black",
-                "tickfont": "Arial",
+                "color": "#31333F",
+                "tickfont": "Roboto, sans-serif",
                 "tickfontsize": "12"
             },
             "input_cbar_layout": {
                 "Cbar title": "Expression",
-                "Font": "Arial",
+                "Font": "Roboto, sans-serif",
                 "Size": "12",
-                "color": "black",
-                "tickfont": "Arial",
+                "color": "#31333F",
+                "tickfont": "Roboto, sans-serif",
                 "tickfontsize": "10"
             },
             "input_label_layout": {
                 "Label title": "",
-                "Font": "Arial",
+                "Font": "Roboto, sans-serif",
                 "Size": "12",
-                "color": "black",
+                "color": "#31333F",
                 "height": "0.05",
                 "spacing": "0.02"
             },

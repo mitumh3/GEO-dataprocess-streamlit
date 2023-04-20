@@ -4,7 +4,7 @@ from main_helper import RESULT_PATH, get_processed_dataset, start_page
 from streamlit import session_state as cache
 
 from .data_utils import PlotData
-from .plot_helper import Graph
+from .plot_helper import Graph, disply_save_button, draw_graph
 
 st.set_option("deprecation.showPyplotGlobalUse", False)
 
@@ -19,7 +19,6 @@ def layout():
 
     """
     start_page("plot", ["geo_id"])
-
     ## FORM OF CHOOSING DATASETS
     # Create form
     dataset_lst = get_processed_dataset()
@@ -62,8 +61,17 @@ def layout():
             cache.processed = geo_id
     # Load data for plotting
     data = cache.data
+    with col2_initial:
+        # SELECT LABEL:
+        # st.subheader("Select label")
+        label_lst = [x for x in data.labels.index]
+        label_title = st.selectbox("***Select label:***", label_lst)
 
-    tab1, tab2 = st.tabs(["Plot", "Preview data"])
+        new_label_title = label_title.split("_", maxsplit=1)[1]
+        cache.label_title = new_label_title
+        cache.label = data.get_label(label_title, new_label_title)
+
+    tab1, tab2, tab3 = st.tabs(["Plot", "Preview data", "PCA"])
 
     with tab2:
         num_rows, num_cols = data.clinical_data.shape
@@ -74,6 +82,13 @@ def layout():
         st.subheader("Denote table")
         st.write(data.denote_log)
 
+    with tab3:
+        dimension = st.select_slider("Choose dimension number:", options=[2, 3, "all"])
+        with st.expander("***Result:***", expanded=True):
+            pca_output = graph.draw_pca(data, dimension)
+        disply_save_button(
+            pca_output, "save_pca", f"pca{dimension}d_{cache.label_title}"
+        )
     with tab1:
         ## OPTIONS OF PLOT TYPES
         # Create radio select
@@ -115,16 +130,6 @@ def layout():
             unsafe_allow_html=True,
         )
 
-        # SELECT LABEL:
-        st.subheader("Select label")
-        label_lst = [x for x in data.labels.index]
-        label_title = st.selectbox(
-            "Choose label", label_lst, label_visibility="collapsed"
-        )
-
-        new_label_title = label_title.split("_", maxsplit=1)[1]
-        cache.label_title = new_label_title
-        cache.label = data.get_label(label_title, new_label_title)
         graph.set_para()
 
         ## PARAMETERS OF THE CHOSEN PLOT
@@ -139,11 +144,17 @@ def layout():
                 graph.display_para("advanced")
             submit_button = st.form_submit_button("Submit", type="primary")
 
-        if not submit_button:
+        if submit_button:
+            # Load input parameters
+            input_dict = graph.load_input_and_data(data)
+
+        if "input" not in cache:
             st.stop()
 
-        with st.spinner("Drawing..."):
-            # Load input parameters
-            graph.load_input_paras()
-            # Draw
-            graph.draw_graph(data)
+        with st.expander("***Result:***", expanded=True):
+            with st.spinner("Drawing..."):
+                # Draw
+                output = draw_graph(cache.df_z, cache.input)
+        disply_save_button(
+            output, f"save_{graph.OPT}", f"{graph.OPT}_{cache.label_title}"
+        )
