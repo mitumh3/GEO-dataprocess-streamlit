@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from operator import index
 
 import numpy as np
 import pandas as pd
@@ -131,6 +132,29 @@ def rename_numeric_binary_cols(df):
     return df, denote_log
 
 
+def sort_by_label(df_z, df_label, patient_id):
+    # Transpose dataframes so that patients are the rows
+    df_label = df_label.T
+    df_z = df_z.T
+    patient_id = patient_id.T
+
+    # Sort df_sort based on values in df_label and patient_id
+    df_sort = df_label.merge(patient_id, left_index=True, right_index=True)
+    df_sort = df_sort.sort_values(by=[df_label.columns[0], patient_id.columns[0]])
+
+    # Sort dataframes based on values in df_sort
+    df_label = df_label.loc[df_sort.index]
+    df_z = df_z.loc[df_sort.index]
+    patient_id = patient_id.loc[df_sort.index]
+
+    # Transpose dataframes back to their original shape
+    df_label = df_label.T
+    df_z = df_z.T
+    patient_id = patient_id.T
+
+    return df_z, df_label, patient_id
+
+
 @dataclass
 class PlotData:
     merged_data = None
@@ -211,7 +235,6 @@ class PlotData:
         elif scaler == "Min Max":
             scaler = MinMaxScaler()
         df = pd.DataFrame(scaler.fit_transform(df.T), columns=df.index).T
-        # df = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
         if num_rows == -1:
             return df
         else:

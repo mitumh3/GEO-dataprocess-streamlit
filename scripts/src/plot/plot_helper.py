@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import streamlit as st
 from streamlit import session_state as cache
 
+from .data_utils import sort_by_label
 from .plotting import heatmap_func
 
 
@@ -59,10 +60,13 @@ class Graph:
         columns = st.columns(len(paras))
         for col, para_name in zip(columns, paras):
             with col:
-                para_opts = paras[para_name]
+                if paras[para_name] == "False":
+                    para_opts = False
+                else:
+                    para_opts = True
                 selection = st.checkbox(
                     f"***{para_name}***",
-                    para_opts,
+                    value=para_opts,
                     key=f"{self.OPT}_{sulfix}_{para_name}",
                 )
             selection = self.check_input_para(selection)
@@ -125,27 +129,20 @@ class Graph:
         for key, value in self.INPUT.items():
             if "Scale" in value:
                 scale = self.INPUT[key]["Scale"]
+            if "Label cluster" in value:
+                label_cluster = self.INPUT[key]["Label cluster"]
+
         # Get data
         df_z = data.get_expression(num_rows=num_rows, scaler=scale)
         df_label = cache.label
         patient_id = data.patient_id
-        # st.write(df_z)
-        # st.write(df_label)
-        # Draw plot
-        # First, let's transpose both dataframes so that patients are the rows
-        df_label = df_label.T
-        df_z = df_z.T
-        patient_id = patient_id.T
-        # Then, let's sort both dataframes based on "disease" column in df_1
-        df_label = df_label.sort_values(by=df_label.columns[0])
-        df_z = df_z.loc[df_label.index]
-        patient_id = patient_id.loc[df_label.index]
 
-        # Finally, let's transpose both dataframes back to their original shape
-        df_label = df_label.T
-        df_z = df_z.T
-        patient_id = patient_id.T
+        # Cluster by labels
+        if label_cluster:
+            df_z, df_label, patient_id = sort_by_label(df_z, df_label, patient_id)
         patient_id = list(patient_id.squeeze())
+
+        # Draw plot
         fig = heatmap_func(self.INPUT, df_z, df_label, patient_id)
 
         # Display plot

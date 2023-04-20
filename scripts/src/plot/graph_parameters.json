@@ -196,7 +196,8 @@
                 ],
                 "Scale": ["Standard", "Min Max"],
                 "Mid point": "0"
-            }
+            },
+            "check_para":{"Label cluster": "False"}
         },
         "advanced": {
             "input_plot_layout": {

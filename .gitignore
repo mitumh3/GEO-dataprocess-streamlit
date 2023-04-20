@@ -1,8 +1,8 @@
 **/__pycache__
-Makefile
-env
+**/Makefile
+**/env
 **/setup-done.txt
 dataset
 processed_data
-test.*
-.env
+**/test.py
+**/.DS_Store
