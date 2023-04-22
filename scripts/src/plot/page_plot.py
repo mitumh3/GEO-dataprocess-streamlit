@@ -61,17 +61,15 @@ def layout():
             cache.processed = geo_id
     # Load data for plotting
     data = cache.data
-    with col2_initial:
-        # SELECT LABEL:
-        # st.subheader("Select label")
-        label_lst = [x for x in data.labels.index]
-        label_title = st.multiselect("***Select label:***", label_lst)
 
-        new_label_title = [
-            old_label.split("_", maxsplit=1)[1] for old_label in label_title
-        ]
-        cache.label = data.get_label(label_title, new_label_title)
-        cache.label_title = new_label_title
+    # SELECT LABEL:
+    # st.subheader("Select label")
+    label_lst = [x for x in data.labels.index]
+    label_title = st.multiselect("***Select label:***", label_lst)
+
+    new_label_title = [old_label.split("_", maxsplit=1)[1] for old_label in label_title]
+    cache.label = data.get_label(label_title, new_label_title)
+    cache.label_title = new_label_title
 
     tab1, tab2, tab3 = st.tabs(["Plot", "Preview data", "PCA"])
 
@@ -84,15 +82,6 @@ def layout():
         st.subheader("Denote table")
         st.write(data.denote_log)
 
-    with tab3:
-        dimension = st.select_slider(
-            "***Choose dimension number:***", options=[2, 3, "all"]
-        )
-        with st.expander("***Result:***", expanded=True):
-            pca_output = graph.draw_pca(data, dimension)
-
-        sulfix = "-".join(cache.label_title)
-        disply_save_button(pca_output, "save_pca", f"pca{dimension}d_{sulfix}")
     with tab1:
         ## OPTIONS OF PLOT TYPES
         # Create radio select
@@ -110,11 +99,35 @@ def layout():
             st.stop()
         cache[cache.graph_opt] = {}
 
+        display_run_type(data.gene_lst)
         st.write(
             f"\n<h1 style='text-align: center;'> {cache.geo_id} - {cache.graph_opt} </h1>\n",
             unsafe_allow_html=True,
         )
 
+    with tab3:
+        if not cache.label_title:
+            st.info("Choose labels to continue")
+        else:
+            if len(cache.label_title) > 1:
+                st.warning(
+                    "For the best results, it's recommended to analyze PCA with only one label. Any additional labels beyond the first will be ignored."
+                )
+            col1pca, col2pca = st.columns(2, gap="large")
+            dimension = col1pca.select_slider(
+                "***Choose dimension number:***", options=[2, 3, "all"]
+            )
+            col2pca.write("***White background***")
+            white_background = col2pca.checkbox(
+                "White background", key="pca_bg", label_visibility="collapsed"
+            )
+            with st.expander("***Result:***", expanded=True):
+                pca_output = graph.draw_pca(data, dimension, white_background)
+
+            sulfix = "-".join(cache.label_title)
+            disply_save_button(pca_output, "save_pca", f"pca{dimension}d_{sulfix}")
+
+    with tab1:
         graph.set_para()
 
         ## PARAMETERS OF THE CHOSEN PLOT
@@ -123,7 +136,6 @@ def layout():
 
         # Create form
         with st.form("graph_para"):
-            display_run_type(data.gene_lst)
             graph.display_para("simple")
 
             with st.expander("Advanced settings"):
@@ -136,6 +148,10 @@ def layout():
 
         if "input" not in cache:
             st.stop()
+
+        if "dendrogram" in cache:
+            with st.expander("***Dendrogram:***", expanded=True):
+                st.pyplot(cache.dendrogram)
 
         with st.expander("***Result:***", expanded=True):
             with st.spinner("Drawing..."):

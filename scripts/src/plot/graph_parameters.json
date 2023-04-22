@@ -197,9 +197,51 @@
                 "Scale": ["Standard", "Min Max"],
                 "Mid point": "0"
             },
-            "check_para":{"Label cluster": "False"}
+            "check_para":{
+                "Sort by label": "False",
+                "Row cluster": "False",
+                "Column cluster": "False"
+            }
         },
         "advanced": {
+            "input_cluster":{
+                "Row cluster threshold":"0.6",
+                "Column cluster threshold":"0.6"
+            },
+            "select_cluster":{
+                "Distance metric":[
+                    "euclidean", 
+                    "braycurtis", 
+                    "canberra", 
+                    "chebyshev", 
+                    "cityblock", 
+                    "correlation", 
+                    "cosine", 
+                    "dice",
+                    "hamming", 
+                    "jaccard", 
+                    "jensenshannon", 
+                    "kulczynski1", 
+                    "mahalanobis", 
+                    "matching", 
+                    "minkowski", 
+                    "rogerstanimoto", 
+                    "russellrao", 
+                    "seuclidean", 
+                    "sokalmichener", 
+                    "sokalsneath", 
+                    "sqeuclidean", 
+                    "yule"],
+                "Linkage method":[
+                    "average",
+                    "signle",
+                    "complete",
+                    "weighted",
+                    "centroid",
+                    "median",
+                    "ward"
+                ]
+            },
             "input_plot_layout": {
                 "Plot title": "Heatmap",
                 "Font": "Roboto, sans-serif",
@@ -240,8 +282,9 @@
                 "height": "0.01",
                 "spacing": "0.02"
             },
-            "slide_xaxis": {
-                "X-axis tick angle": [-90, 45, 90, 5]
+            "slide_tick_angle": {
+                "X-axis tick angle": [-90, 45, 90, 5],
+                "Y-axis tick angle": [-90, 0, 90, 5]
             },
             "input_cbar_pos": {
                 "Cbar right": "50",

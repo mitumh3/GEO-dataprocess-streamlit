@@ -132,18 +132,30 @@ def rename_numeric_binary_cols(df):
     return df, denote_log
 
 
-def sort_by_label(df_z, df_label, patient_id):
+def sort_by_label(df_z, df_label, patient_id, clusters):
     # Transpose dataframes so that patients are the rows
     df_label = df_label.T
     df_z = df_z.T
     patient_id = patient_id.T
 
+    if len(clusters) == 0:
+        df_sort = df_label
+    else:
+        df_sort = pd.concat(
+            [
+                df_label.iloc[:, :1],
+                pd.DataFrame({"cluster": clusters}),
+                df_label.iloc[:, 1:],
+            ],
+            axis=1,
+        )
     # Sort df_sort based on values in df_label and patient_id
-    df_label.sort_values(by=list(df_label.columns.values), inplace=True)
+    df_sort.sort_values(by=list(df_sort.columns.values), inplace=True)
 
     # Sort dataframes based on values in df_sort
-    df_z = df_z.loc[df_label.index]
-    patient_id = patient_id.loc[df_label.index]
+    df_label = df_label.loc[df_sort.index]
+    df_z = df_z.loc[df_sort.index]
+    patient_id = patient_id.loc[df_sort.index]
 
     # Transpose dataframes back to their original shape
     df_label = df_label.T

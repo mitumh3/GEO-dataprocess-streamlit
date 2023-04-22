@@ -1,21 +1,30 @@
+from multiprocessing import Pool, cpu_count
+
 import altair as alt
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
 # # - Line chart:
 import plotly.io as pio
+import scipy.cluster.hierarchy as sch
 import seaborn as sns
 import streamlit as st
 from plotly.subplots import make_subplots
+from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
 pio.templates.default = "seaborn"
 pio.templates["seaborn"].layout.font.family = "Roboto, sans-serif"
+import sys
+
+sys.setrecursionlimit(1000000)
 
 
-def pca_2d(df_exp, df_label, label_title, patient_id):
+def pca_2d(df_exp, df_label, label_title, patient_id, plot_bgcolor):
     # Extract the numerical features from the data
     data = df_exp.T
 
@@ -93,11 +102,11 @@ def pca_2d(df_exp, df_label, label_title, patient_id):
         zerolinewidth=1,
         zerolinecolor="rgba(180, 180, 180, 0.1)",
     )
-    fig.update_layout(plot_bgcolor="rgb(250, 250, 250)")
+    fig.update_layout(plot_bgcolor=plot_bgcolor)
     return fig
 
 
-def pca_3d(df_exp, df_label, label_title, patient_id):
+def pca_3d(df_exp, df_label, label_title, patient_id, plot_bgcolor):
     pio.templates.default = "plotly_white"
     pio.templates["plotly_white"].layout.font.family = "Roboto, sans-serif"
 
@@ -154,7 +163,7 @@ def pca_3d(df_exp, df_label, label_title, patient_id):
     fig.update_layout(
         scene=dict(
             xaxis=dict(
-                backgroundcolor="rgb(250, 250, 250)",
+                backgroundcolor=plot_bgcolor,
                 showbackground=True,
                 title="Principal Component 1",
                 titlefont=dict(
@@ -163,7 +172,7 @@ def pca_3d(df_exp, df_label, label_title, patient_id):
                 ),
             ),
             yaxis=dict(
-                backgroundcolor="rgb(250, 250, 250)",
+                backgroundcolor=plot_bgcolor,
                 showbackground=True,
                 title="Principal Component 2",
                 titlefont=dict(
@@ -172,7 +181,7 @@ def pca_3d(df_exp, df_label, label_title, patient_id):
                 ),
             ),
             zaxis=dict(
-                backgroundcolor="rgb(250, 250, 250)",
+                backgroundcolor=plot_bgcolor,
                 showbackground=True,
                 title="Principal Component 3",
                 titlefont=dict(
@@ -182,12 +191,11 @@ def pca_3d(df_exp, df_label, label_title, patient_id):
             ),
             # bgcolor="cyan",
         ),
-        plot_bgcolor="rgb(12,163,135)",
     )
     return fig
 
 
-def plot_explained_variance(df_exp):
+def plot_explained_variance(df_exp, plot_bgcolor):
     pca = PCA()
     pca.fit(df_exp)
     exp_var_cumul = np.cumsum(pca.explained_variance_ratio_)
@@ -226,7 +234,7 @@ def plot_explained_variance(df_exp):
                 color="#31333F",
             ),
         ),
-        plot_bgcolor="rgb(250, 250, 250)",
+        plot_bgcolor=plot_bgcolor,
     )
     return fig
 
@@ -275,6 +283,117 @@ def map_label_colors(label, label_color):
     lut = dict(zip(unique_class, colors))
     target_colors = label.map(lut)
     return target_colors
+
+
+def custom_code(cmd):
+    if cmd != None:
+        eval(cmd)
+
+
+def kmean_cluster(df):
+    # Define the range of n_clusters to try
+    range_n_clusters = range(1, 100)
+
+    # Calculate the within-cluster sum of squares (WCSS) for different values of n_clusters
+    wcss = []
+    for n_clusters in range_n_clusters:
+        kmeans = KMeans(n_clusters=n_clusters)
+        kmeans.fit(df.transpose())
+        wcss.append(kmeans.inertia_)
+
+    # Create a plotly figure for the Elbow Method
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=[i for i in range_n_clusters],
+            y=wcss,
+            mode="lines+markers",
+            marker=dict(size=7),
+            name="Cluster",
+        )
+    )
+
+    fig.update_layout(
+        title="Elbow Method for Optimal n_clusters",
+        xaxis_title="Number of clusters",
+        yaxis_title="Within-cluster sum of squares (WCSS)",
+        template="plotly_white",
+        width=800,
+        height=500,
+        font=dict(family="Calibri", size=14),
+    )
+
+    st.plotly_chart(fig)
+
+    # Perform k-means clustering on the gene expression data
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    cluster_labels = kmeans.fit_predict(df)
+    # Reorder the rows and columns of the DataFrame based on the clustering
+    df_clustered = df.iloc[np.argsort(cluster_labels)]
+
+
+def cluster(_df, metric, method, threshold):
+    # Compute distance matrix and apply hierarchical clustering using average linkage
+    distance_matrix = sch.distance.pdist(_df, metric=metric)
+    linkage_matrix = sch.linkage(
+        distance_matrix, method=method
+    )  # you can change the linkage method here
+
+    th = threshold  # choose a threshold value to cut the tree
+
+    # Extract cluster assignments based on the dendrogram and threshold value
+    clusters = sch.fcluster(linkage_matrix, th, criterion="distance")
+
+    return clusters, linkage_matrix
+
+
+def dendrogram(linkage_matrix, threshold):
+    fig, ax = plt.subplots(figsize=(21, 7))
+    plt.title("Hierarchical Clustering Dendrogram")
+    plt.xlabel("sample index")
+    plt.ylabel("distance")
+    sch.dendrogram(
+        linkage_matrix,
+        # truncate_mode="level",
+        color_threshold=threshold,  # set the threshold here
+        above_threshold_color="gray",  # color the lines above the threshold gray
+        orientation="top",
+        leaf_rotation=45,
+        leaf_font_size=8,
+    )
+    ax.axhline(y=threshold, color="r", linestyle="--")
+    # plt.xticks(rotation=45)
+
+    return fig
+
+
+def cluster_worker(df, metric, method):
+    # Compute distance matrix and apply hierarchical clustering using average linkage
+    distance_matrix = sch.distance.pdist(df, metric=metric)
+    linkage_matrix = sch.linkage(
+        distance_matrix, method=method
+    )  # you can change the linkage method here
+
+    # Choose a threshold value to cut the tree
+    th = 0.6  # choose a threshold value to cut the tree
+
+    # Extract cluster assignments based on the dendrogram and threshold value
+    clusters = sch.fcluster(linkage_matrix, th, criterion="distance")
+
+    # Use the cluster assignments to reorder the rows of the dataframe
+    genes_reordered = df.iloc[np.argsort(clusters)]
+    return genes_reordered
+
+
+def cluster_multi(df, n_jobs=None):
+    if n_jobs is None:
+        n_jobs = cpu_count()
+    pool = Pool(processes=n_jobs)
+    chunks = np.array_split(df, n_jobs)
+    result = pd.concat(pool.map(cluster_worker, chunks))
+    pool.close()
+    pool.join()
+    return result
 
 
 def heatmap_func(input_paras, df, df_label, patient_id):
@@ -372,7 +491,7 @@ def heatmap_func(input_paras, df, df_label, patient_id):
             family=paras["xaxis"]["tickfont"],
             size=paras["xaxis"]["tickfontsize"],
         ),
-        tickangle=paras["xaxis"]["X-axis tick angle"],
+        tickangle=paras["tick_angle"]["X-axis tick angle"],
     )
 
     # Main yaxis layout
@@ -388,6 +507,7 @@ def heatmap_func(input_paras, df, df_label, patient_id):
             size=paras["yaxis"]["tickfontsize"],
         ),
         autorange="reversed",
+        tickangle=paras["tick_angle"]["Y-axis tick angle"],
     )
 
     # Label y axes layout
@@ -398,7 +518,8 @@ def heatmap_func(input_paras, df, df_label, patient_id):
                 family=paras["label_layout"]["Font"],
                 size=paras["label_layout"]["Size"],
                 color=paras["label_layout"]["color"],
-            )
+            ),
+            tickangle=paras["tick_angle"]["Y-axis tick angle"],
         )
-    eval(paras["custom"]["*Custom codes (For developers)"])
+    custom_code(paras["custom"]["*Custom codes (For developers)"])
     return fig

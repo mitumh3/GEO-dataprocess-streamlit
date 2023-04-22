@@ -54,5 +54,6 @@ zipp==3.15.0
 python-dotenv
 seaborn
 scikit-learn
+fastcluster
 statsmodels
 kaleido

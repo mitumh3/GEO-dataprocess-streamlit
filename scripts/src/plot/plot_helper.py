@@ -2,12 +2,20 @@ import json
 import os
 from dataclasses import dataclass
 
+import numpy as np
 import streamlit as st
 from dotenv import load_dotenv
 from streamlit import session_state as cache
 
 from .data_utils import sort_by_label
-from .plotting import heatmap_func, pca_2d, pca_3d, plot_explained_variance
+from .plotting import (
+    cluster,
+    dendrogram,
+    heatmap_func,
+    pca_2d,
+    pca_3d,
+    plot_explained_variance,
+)
 
 load_dotenv()
 FIGURE_PATH = os.getenv("figure_path")
@@ -31,16 +39,24 @@ class Graph:
             self.GRAPH_DICT = json.load(f)
         self.OPTIONS = self.GRAPH_DICT.keys()
 
-    def draw_pca(self, data, dimension):
+    def draw_pca(self, data, dimension, white_background):
         df_exp = data.get_expression()
         patient_id = data.patient_id
+        if not white_background:
+            plot_bgcolor = "rgb(250, 250, 250)"
+        else:
+            plot_bgcolor = "white"
 
         if dimension == 2:
-            fig = pca_2d(df_exp, cache.label, cache.label_title, patient_id)
+            fig = pca_2d(
+                df_exp, cache.label, cache.label_title, patient_id, plot_bgcolor
+            )
         elif dimension == 3:
-            fig = pca_3d(df_exp, cache.label, cache.label_title, patient_id)
+            fig = pca_3d(
+                df_exp, cache.label, cache.label_title, patient_id, plot_bgcolor
+            )
         else:
-            fig = plot_explained_variance(df_exp)
+            fig = plot_explained_variance(df_exp, plot_bgcolor)
         st.plotly_chart(fig, use_container_width=True, theme=None)
         return fig
 
@@ -152,22 +168,48 @@ class Graph:
         for key, value in self.INPUT.items():
             if "Scale" in value:
                 scale = self.INPUT[key]["Scale"]
-            if "Label cluster" in value:
-                label_cluster = self.INPUT[key]["Label cluster"]
+            if "Sort by label" in value:
+                label_cluster = self.INPUT[key]["Sort by label"]
+            if "Row cluster" in value:
+                row_cluster = self.INPUT[key]["Row cluster"]
+            if "Column cluster" in value:
+                col_cluster = self.INPUT[key]["Column cluster"]
 
         # Get data
         self.DF_Z = data.get_expression(row_take=self.ROW_TAKE, scaler=scale)
         self.DF_LABEL = cache.label
         self.ID = data.patient_id
 
+        if col_cluster:
+            col_clusters, col_linkage_matrix = cluster(
+                self.DF_Z.T,
+                self.INPUT["cluster"]["Distance metric"],
+                self.INPUT["cluster"]["Linkage method"],
+                self.INPUT["cluster"]["Column cluster threshold"],
+            )
+        else:
+            col_clusters = []
+
         # Cluster by labels
-        # try:
         if label_cluster:
             self.DF_Z, self.DF_LABEL, self.ID = sort_by_label(
-                self.DF_Z, self.DF_LABEL, self.ID
+                self.DF_Z, self.DF_LABEL, self.ID, col_clusters
             )
-        # except:
-        #     pass
+
+        # Cluster by rows
+        if row_cluster:
+            row_clusters, row_linkage_matrix = cluster(
+                self.DF_Z,
+                self.INPUT["cluster"]["Distance metric"],
+                self.INPUT["cluster"]["Linkage method"],
+                self.INPUT["cluster"]["Row cluster threshold"],
+            )
+            # Use the cluster assignments to reorder the rows of the dataframe
+            self.DF_Z = self.DF_Z.iloc[np.argsort(row_clusters)]
+
+            cache.dendrogram = dendrogram(
+                row_linkage_matrix, self.INPUT["cluster"]["Row cluster threshold"]
+            )
         self.ID = list(self.ID.squeeze())
 
         # Caching input
@@ -177,6 +219,7 @@ class Graph:
             "df_label": self.DF_LABEL,
             "id": self.ID,
         }
+
         cache.df_z = self.DF_Z
 
 
@@ -215,9 +258,8 @@ def draw_graph(_df_z, input_dict):
     fig = heatmap_func(
         input_dict["parameters"], _df_z, input_dict["df_label"], input_dict["id"]
     )
-
     # Display plot
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, theme=None)
     return fig
 
 
