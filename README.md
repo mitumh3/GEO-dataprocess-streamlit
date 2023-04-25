@@ -13,7 +13,7 @@ This repository contains an interactive Streamlit app for processing and visuali
 Here's a demo of the project:
 
 <div align="center">
-  <img src="accession-id.gif" width="250px" />
+  <img src="accession-id.gif" width="500px" />
 </div>
 
 ## Installation
