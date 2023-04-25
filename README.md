@@ -12,10 +12,9 @@ This repository contains an interactive Streamlit app for processing and visuali
 
 Here's a demo of the project:
 
-<video width="320" height="240" controls>
-  <source src="streamlit-main-2023-04-25-13-04-67.webm" type="video/webm">
-  Your browser does not support the video tag.
-</video>
+<div align="center">
+  <img src="accession-id.gif" width="250px" />
+</div>
 
 ## Installation
 
