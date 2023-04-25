@@ -10,13 +10,8 @@ This repository contains an interactive Streamlit app for processing and visuali
 - Quality control including PCA and heatmap analysis
 - Differential expression analyses based on predefined criteria, with visualization and figure download options
 
-![alt text](https://github.com/mitumh3/GEO-dataprocess-streamlit/blob/main/Heatmap.jpg?raw=true)
-<table>
-  <tr>
-    <td><img src="Heatmap.jpg"></td>
-    <td><img src="pca3d.jpg"></td>
-  </tr>
-</table>
+![plot](./example-figures/Heatmap.jpg)
+![plot](./example-figures/pca3d.jpg)
 
 ## Installation
 
