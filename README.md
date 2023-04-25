@@ -10,6 +10,13 @@ This repository contains an interactive Streamlit app for processing and visuali
 - Quality control including PCA and heatmap analysis
 - Differential expression analyses based on predefined criteria, with visualization and figure download options
 
+<table>
+  <tr>
+    <td><img src="Heatmap.jpeg"></td>
+    <td><img src="pca3d.jpeg"></td>
+  </tr>
+</table>
+
 ## Installation
 
 To run the app locally, first clone the repository:
@@ -32,4 +39,4 @@ streamlit run scripts/src/main.py
 
 # Demo
 
-- <https://github.com/mitumh3/Demo-GEO-dataprocess-streamlit>
+<https://github.com/mitumh3/Demo-GEO-dataprocess-streamlit>
