@@ -37,6 +37,6 @@ To run the app, type:
 streamlit run scripts/src/main.py
 ```
 
-# 🎥 Demo
+## 🎥 Demo
 
 <https://github.com/mitumh3/Demo-GEO-dataprocess-streamlit>
