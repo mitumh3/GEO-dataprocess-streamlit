@@ -10,7 +10,12 @@ This repository contains an interactive Streamlit app for processing and visuali
 - Quality control including PCA and heatmap analysis
 - Differential expression analyses based on predefined criteria, with visualization and data download options
 
-![Demo](streamlit-main-2023-04-25-13-04-67.webm)
+Here's a demo of the project:
+
+<video width="320" height="240" controls>
+  <source src="streamlit-main-2023-04-25-13-04-67.webm" type="video/webm">
+  Your browser does not support the video tag.
+</video>
 
 ## Installation
 
