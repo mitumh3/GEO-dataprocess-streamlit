@@ -1,9 +1,9 @@
 
-# GEO dataprocess streamlit
+# 🌍 GEO dataprocess streamlit
 
 This repository contains an interactive Streamlit app for processing and visualizing GEO data from NCBI's Gene Expression Omnibus. The web app allows users to derive datasets from GEO and automatically perform data preprocessing such as normalization, filtering, and differential expression. This app can be useful for researchers who are working with RNA-Seq data and trying to identify differentially expressed genes for further analysis.
 
-## Features
+## 🌟 Features
 
 - Parsing of GEO formatted files
 - Auto data cleansing and processing
@@ -17,7 +17,7 @@ This repository contains an interactive Streamlit app for processing and visuali
   </tr>
 </table>
 
-## Installation
+## 💻 Installation
 
 To run the app locally, first clone the repository:
 
@@ -37,6 +37,6 @@ To run the app, type:
 streamlit run scripts/src/main.py
 ```
 
-# Demo
+# 🎥 Demo
 
 <https://github.com/mitumh3/Demo-GEO-dataprocess-streamlit>
