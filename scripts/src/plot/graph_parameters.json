@@ -200,7 +200,8 @@
             "check_para":{
                 "Sort by label": "False",
                 "Row cluster": "False",
-                "Column cluster": "False"
+                "Column cluster": "False",
+                "Dendrogram":"False"
             }
         },
         "advanced": {

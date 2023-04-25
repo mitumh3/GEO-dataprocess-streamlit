@@ -190,6 +190,8 @@ class Graph:
         else:
             col_clusters = []
 
+        # TODO: create a single cluster that control label and col
+
         # Cluster by labels
         if label_cluster:
             self.DF_Z, self.DF_LABEL, self.ID = sort_by_label(
@@ -207,9 +209,11 @@ class Graph:
             # Use the cluster assignments to reorder the rows of the dataframe
             self.DF_Z = self.DF_Z.iloc[np.argsort(row_clusters)]
 
-            cache.dendrogram = dendrogram(
-                row_linkage_matrix, self.INPUT["cluster"]["Row cluster threshold"]
-            )
+            if self.INPUT["para"]["Dendrogram"]:
+                dendrogram_fig = dendrogram(
+                    row_linkage_matrix, self.INPUT["cluster"]["Row cluster threshold"]
+                )
+                cache.dendrogram = dendrogram_fig
         self.ID = list(self.ID.squeeze())
 
         # Caching input

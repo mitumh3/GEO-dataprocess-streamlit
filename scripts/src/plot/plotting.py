@@ -354,7 +354,7 @@ def dendrogram(linkage_matrix, threshold):
     plt.ylabel("distance")
     sch.dendrogram(
         linkage_matrix,
-        # truncate_mode="level",
+        truncate_mode="mtica",
         color_threshold=threshold,  # set the threshold here
         above_threshold_color="gray",  # color the lines above the threshold gray
         orientation="top",

@@ -149,12 +149,13 @@ def layout():
         if "input" not in cache:
             st.stop()
 
-        if "dendrogram" in cache:
-            with st.expander("***Dendrogram:***", expanded=True):
-                st.pyplot(cache.dendrogram)
+        with st.spinner("Drawing dendrogram..."):
+            if cache.input["parameters"]["para"]["Dendrogram"]:
+                with st.expander("***Dendrogram:***", expanded=True):
+                    st.pyplot(cache.dendrogram)
 
         with st.expander("***Result:***", expanded=True):
-            with st.spinner("Drawing..."):
+            with st.spinner("Drawing graph..."):
                 # Draw
                 output = draw_graph(cache.df_z, cache.input)
         sulfix = "-".join(cache.label_title)
