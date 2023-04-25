@@ -10,8 +10,12 @@ This repository contains an interactive Streamlit app for processing and visuali
 - Quality control including PCA and heatmap analysis
 - Differential expression analyses based on predefined criteria, with visualization and figure download options
 
-![plot](./example-figures/Heatmap.jpg)
-![plot](./example-figures/pca3d.jpg)
+<table>
+  <tr>
+    <td><img src="./example-figures/Heatmap.jpg"></td>
+    <td><img src="./example-figures/pca3d.jpg"></td>
+  </tr>
+</table>
 
 ## Installation
 
