@@ -1,301 +1,656 @@
 {
-    "Heatmap": {
-        "simple": {
-            "select_para": {
-                "Graph pallete": [
-                    "viridis",
-                    "rdbu",
-                    "aggrnyl",
-                    "agsunset",
-                    "algae",
-                    "amp",
-                    "armyrose",
-                    "balance",
-                    "blackbody",
-                    "bluered",
-                    "blues",
-                    "blugrn",
-                    "bluyl",
-                    "brbg",
-                    "brwnyl",
-                    "bugn",
-                    "bupu",
-                    "burg",
-                    "burgyl",
-                    "cividis",
-                    "curl",
-                    "darkmint",
-                    "deep",
-                    "delta",
-                    "dense",
-                    "earth",
-                    "edge",
-                    "electric",
-                    "emrld",
-                    "fall",
-                    "geyser",
-                    "gnbu",
-                    "gray",
-                    "greens",
-                    "greys",
-                    "haline",
-                    "hot",
-                    "hsv",
-                    "ice",
-                    "icefire",
-                    "inferno",
-                    "jet",
-                    "magenta",
-                    "magma",
-                    "matter",
-                    "mint",
-                    "mrybm",
-                    "mygbm",
-                    "oranges",
-                    "orrd",
-                    "oryel",
-                    "oxy",
-                    "peach",
-                    "phase",
-                    "picnic",
-                    "pinkyl",
-                    "piyg",
-                    "plasma",
-                    "plotly3",
-                    "portland",
-                    "prgn",
-                    "pubu",
-                    "pubugn",
-                    "puor",
-                    "purd",
-                    "purp",
-                    "purples",
-                    "purpor",
-                    "rainbow",
-                    "rdgy",
-                    "rdpu",
-                    "rdylbu",
-                    "rdylgn",
-                    "redor",
-                    "reds",
-                    "solar",
-                    "spectral",
-                    "speed",
-                    "sunset",
-                    "sunsetdark",
-                    "teal",
-                    "tealgrn",
-                    "tealrose",
-                    "tempo",
-                    "temps",
-                    "thermal",
-                    "tropic",
-                    "turbid",
-                    "turbo",
-                    "twilight",
-                    "ylgn",
-                    "ylgnbu",
-                    "ylorbr",
-                    "ylorrd"
-                ],
-                "Label pallete": [
-                    "amp",
-                    "bluered",
-                    "aggrnyl",
-                    "agsunset",
-                    "algae",
-                    "armyrose",
-                    "balance",
-                    "blackbody",
-                    "blues",
-                    "blugrn",
-                    "bluyl",
-                    "brbg",
-                    "brwnyl",
-                    "bugn",
-                    "bupu",
-                    "burg",
-                    "burgyl",
-                    "cividis",
-                    "curl",
-                    "darkmint",
-                    "deep",
-                    "delta",
-                    "dense",
-                    "earth",
-                    "edge",
-                    "electric",
-                    "emrld",
-                    "fall",
-                    "geyser",
-                    "gnbu",
-                    "gray",
-                    "greens",
-                    "greys",
-                    "haline",
-                    "hot",
-                    "hsv",
-                    "ice",
-                    "icefire",
-                    "inferno",
-                    "jet",
-                    "magenta",
-                    "magma",
-                    "matter",
-                    "mint",
-                    "mrybm",
-                    "mygbm",
-                    "oranges",
-                    "orrd",
-                    "oryel",
-                    "oxy",
-                    "peach",
-                    "phase",
-                    "picnic",
-                    "pinkyl",
-                    "piyg",
-                    "plasma",
-                    "plotly3",
-                    "portland",
-                    "prgn",
-                    "pubu",
-                    "pubugn",
-                    "puor",
-                    "purd",
-                    "purp",
-                    "purples",
-                    "purpor",
-                    "rainbow",
-                    "rdbu",
-                    "rdgy",
-                    "rdpu",
-                    "rdylbu",
-                    "rdylgn",
-                    "redor",
-                    "reds",
-                    "solar",
-                    "spectral",
-                    "speed",
-                    "sunset",
-                    "sunsetdark",
-                    "teal",
-                    "tealgrn",
-                    "tealrose",
-                    "tempo",
-                    "temps",
-                    "thermal",
-                    "tropic",
-                    "turbid",
-                    "turbo",
-                    "twilight",
-                    "viridis",
-                    "ylgn",
-                    "ylgnbu",
-                    "ylorbr",
-                    "ylorrd"
-                ],
-                "Scale": ["Standard", "Min Max"],
-                "Mid point": "0"
-            },
-            "check_para":{
-                "Sort by label": "False",
-                "Row cluster": "False",
-                "Column cluster": "False",
-                "Dendrogram":"False"
-            }
-        },
-        "advanced": {
-            "input_cluster":{
-                "Row cluster threshold":"0.6",
-                "Column cluster threshold":"0.6"
-            },
-            "select_cluster":{
-                "Distance metric":[
-                    "euclidean", 
-                    "braycurtis", 
-                    "canberra", 
-                    "chebyshev", 
-                    "cityblock", 
-                    "correlation", 
-                    "cosine", 
-                    "dice",
-                    "hamming", 
-                    "jaccard", 
-                    "jensenshannon", 
-                    "kulczynski1", 
-                    "mahalanobis", 
-                    "matching", 
-                    "minkowski", 
-                    "rogerstanimoto", 
-                    "russellrao", 
-                    "seuclidean", 
-                    "sokalmichener", 
-                    "sokalsneath", 
-                    "sqeuclidean", 
-                    "yule"],
-                "Linkage method":[
-                    "average",
-                    "signle",
-                    "complete",
-                    "weighted",
-                    "centroid",
-                    "median",
-                    "ward"
-                ]
-            },
-            "input_plot_layout": {
-                "Plot title": "Heatmap",
-                "Font": "Roboto, sans-serif",
-                "Size": "16",
-                "color": "#31333F",
-                "Fig width": "1000",
-                "Fig height": "700"
-            },
-            "input_xaxis": {
-                "X-axis title": "Patient",
-                "Font": "Roboto, sans-serif",
-                "Size": "16",
-                "color": "#31333F",
-                "tickfont": "Roboto, sans-serif",
-                "tickfontsize": "12"
-            },
-            "input_yaxis": {
-                "Y-axis title": "Gene",
-                "Font": "Roboto, sans-serif",
-                "Size": "16",
-                "color": "#31333F",
-                "tickfont": "Roboto, sans-serif",
-                "tickfontsize": "12"
-            },
-            "input_cbar_layout": {
-                "Cbar title": "Expression",
-                "Font": "Roboto, sans-serif",
-                "Size": "12",
-                "color": "#31333F",
-                "tickfont": "Roboto, sans-serif",
-                "tickfontsize": "10"
-            },
-            "input_label_layout": {
-                "Label title": "",
-                "Font": "Roboto, sans-serif",
-                "Size": "12",
-                "color": "#31333F",
-                "height": "0.01",
-                "spacing": "0.02"
-            },
-            "slide_tick_angle": {
-                "X-axis tick angle": [-90, 45, 90, 5],
-                "Y-axis tick angle": [-90, 0, 90, 5]
-            },
-            "input_cbar_pos": {
-                "Cbar right": "50",
-                "Cbar width": "20",
-                "Cbar height": "0.5",
-                "outlinewidth": "0"
-            },
-            "code_custom": {"*Custom codes (For developers)":""}
-        }
+  "Heatmap": {
+    "simple": {
+      "graph_pal": {
+        "description": "Graph pallete",
+        "value": [
+          "viridis",
+          "rdbu",
+          "aggrnyl",
+          "agsunset",
+          "algae",
+          "amp",
+          "armyrose",
+          "balance",
+          "blackbody",
+          "bluered",
+          "blues",
+          "blugrn",
+          "bluyl",
+          "brbg",
+          "brwnyl",
+          "bugn",
+          "bupu",
+          "burg",
+          "burgyl",
+          "cividis",
+          "curl",
+          "darkmint",
+          "deep",
+          "delta",
+          "dense",
+          "earth",
+          "edge",
+          "electric",
+          "emrld",
+          "fall",
+          "geyser",
+          "gnbu",
+          "gray",
+          "greens",
+          "greys",
+          "haline",
+          "hot",
+          "hsv",
+          "ice",
+          "icefire",
+          "inferno",
+          "jet",
+          "magenta",
+          "magma",
+          "matter",
+          "mint",
+          "mrybm",
+          "mygbm",
+          "oranges",
+          "orrd",
+          "oryel",
+          "oxy",
+          "peach",
+          "phase",
+          "picnic",
+          "pinkyl",
+          "piyg",
+          "plasma",
+          "plotly3",
+          "portland",
+          "prgn",
+          "pubu",
+          "pubugn",
+          "puor",
+          "purd",
+          "purp",
+          "purples",
+          "purpor",
+          "rainbow",
+          "rdgy",
+          "rdpu",
+          "rdylbu",
+          "rdylgn",
+          "redor",
+          "reds",
+          "solar",
+          "spectral",
+          "speed",
+          "sunset",
+          "sunsetdark",
+          "teal",
+          "tealgrn",
+          "tealrose",
+          "tempo",
+          "temps",
+          "thermal",
+          "tropic",
+          "turbid",
+          "turbo",
+          "twilight",
+          "ylgn",
+          "ylgnbu",
+          "ylorbr",
+          "ylorrd"
+        ],
+        "row": "1",
+        "type": "select"
+      },
+      "label_pal": {
+        "description": "Label pallete",
+        "value": [
+          "amp",
+          "bluered",
+          "aggrnyl",
+          "agsunset",
+          "algae",
+          "armyrose",
+          "balance",
+          "blackbody",
+          "blues",
+          "blugrn",
+          "bluyl",
+          "brbg",
+          "brwnyl",
+          "bugn",
+          "bupu",
+          "burg",
+          "burgyl",
+          "cividis",
+          "curl",
+          "darkmint",
+          "deep",
+          "delta",
+          "dense",
+          "earth",
+          "edge",
+          "electric",
+          "emrld",
+          "fall",
+          "geyser",
+          "gnbu",
+          "gray",
+          "greens",
+          "greys",
+          "haline",
+          "hot",
+          "hsv",
+          "ice",
+          "icefire",
+          "inferno",
+          "jet",
+          "magenta",
+          "magma",
+          "matter",
+          "mint",
+          "mrybm",
+          "mygbm",
+          "oranges",
+          "orrd",
+          "oryel",
+          "oxy",
+          "peach",
+          "phase",
+          "picnic",
+          "pinkyl",
+          "piyg",
+          "plasma",
+          "plotly3",
+          "portland",
+          "prgn",
+          "pubu",
+          "pubugn",
+          "puor",
+          "purd",
+          "purp",
+          "purples",
+          "purpor",
+          "rainbow",
+          "rdbu",
+          "rdgy",
+          "rdpu",
+          "rdylbu",
+          "rdylgn",
+          "redor",
+          "reds",
+          "solar",
+          "spectral",
+          "speed",
+          "sunset",
+          "sunsetdark",
+          "teal",
+          "tealgrn",
+          "tealrose",
+          "tempo",
+          "temps",
+          "thermal",
+          "tropic",
+          "turbid",
+          "turbo",
+          "twilight",
+          "viridis",
+          "ylgn",
+          "ylgnbu",
+          "ylorbr",
+          "ylorrd"
+        ],
+        "row": "1",
+        "type": "select"
+      },
+      "scale": {
+        "description": "Scale",
+        "value": ["Standard", "Min Max"],
+        "row": "1",
+        "type": "select"
+      },
+      "z_mid": {
+        "description": "Mid point",
+        "value": "0",
+        "row": "1",
+        "type": "select"
+      },
+      "label_sort": {
+        "description": "Sort by label",
+        "value": "False",
+        "row": "2",
+        "type": "check"
+      },
+      "row_cluster": {
+        "description": "Row cluster",
+        "value": "False",
+        "row": "2",
+        "type": "check"
+      },
+      "col_cluster": {
+        "description": "Column cluster",
+        "value": "False",
+        "row": "2",
+        "type": "check"
+      },
+      "dendrogram": {
+        "description": "Dendrogram",
+        "value": "False",
+        "row": "2",
+        "type": "check"
+      }
     },
-    "Bar Plot": {},
-    "ROC": {}
+    "advanced": {
+      "fig_width": {
+        "description": "Fig width",
+        "value": "1000",
+        "row": "1",
+        "type": "input"
+      },
+      "fig_height": {
+        "description": "Fig height",
+        "value": "700",
+        "row": "1",
+        "type": "input"
+      },
+      "row_cluster_threshold": {
+        "description": "Row cluster threshold",
+        "value": "0.6",
+        "row": "2",
+        "type": "input"
+      },
+      "col_cluster_threshold": {
+        "description": "Column cluster threshold",
+        "value": "0.6",
+        "row": "2",
+        "type": "input"
+      },
+      "distance_metric": {
+        "description": "Distance metric",
+        "value": [
+          "euclidean",
+          "braycurtis",
+          "canberra",
+          "chebyshev",
+          "cityblock",
+          "correlation",
+          "cosine",
+          "dice",
+          "hamming",
+          "jaccard",
+          "jensenshannon",
+          "kulczynski1",
+          "mahalanobis",
+          "matching",
+          "minkowski",
+          "rogerstanimoto",
+          "russellrao",
+          "seuclidean",
+          "sokalmichener",
+          "sokalsneath",
+          "sqeuclidean",
+          "yule"
+        ],
+        "row": "2",
+        "type": "select"
+      },
+      "link_method": {
+        "description": "Linkage method",
+        "value": [
+          "average",
+          "signle",
+          "complete",
+          "weighted",
+          "centroid",
+          "median",
+          "ward"
+        ],
+        "row": "2",
+        "type": "select"
+      },
+      "plot_title": {
+        "description": "Plot title",
+        "value": "Heatmap",
+        "row": "3",
+        "type": "input"
+      },
+      "plot_title_font": {
+        "description": "Font",
+        "value": "Roboto, sans-serif",
+        "row": "3",
+        "type": "input"
+      },
+      "plot_title_size": {
+        "description": "Size",
+        "value": "16",
+        "row": "3",
+        "type": "input"
+      },
+      "plot_title_color": {
+        "description": "Color",
+        "value": "#31333F",
+        "row": "3",
+        "type": "input"
+      },
+      "x_title": {
+        "description": "X-axis title",
+        "value": "Patient",
+        "row": "4",
+        "type": "input"
+      },
+      "x_title_font": {
+        "description": "Font",
+        "value": "Roboto, sans-serif",
+        "row": "4",
+        "type": "input"
+      },
+      "x_title_size": {
+        "description": "Size",
+        "value": "16",
+        "row": "4",
+        "type": "input"
+      },
+      "x_title_color": {
+        "description": "Color",
+        "value": "#31333F",
+        "row": "4",
+        "type": "input"
+      },
+      "y_title": {
+        "description": "Y-axis title",
+        "value": "Gene",
+        "row": "5",
+        "type": "input"
+      },
+      "y_title_font": {
+        "description": "Font",
+        "value": "Roboto, sans-serif",
+        "row": "5",
+        "type": "input"
+      },
+      "y_title_size": {
+        "description": "Size",
+        "value": "16",
+        "row": "5",
+        "type": "input"
+      },
+      "y_title_color": {
+        "description": "Color",
+        "value": "#31333F",
+        "row": "5",
+        "type": "input"
+      },
+      "cbar_title": {
+        "description": "Cbar title",
+        "value": "Expression",
+        "row": "6",
+        "type": "input"
+      },
+      "cbar_title_font": {
+        "description": "Font",
+        "value": "Roboto, sans-serif",
+        "row": "6",
+        "type": "input"
+      },
+      "cbar_title_size": {
+        "description": "Size",
+        "value": "12",
+        "row": "6",
+        "type": "input"
+      },
+      "cbar_title_color": {
+        "description": "Color",
+        "value": "#31333F",
+        "row": "6",
+        "type": "input"
+      },
+      "label_title": {
+        "description": "Label title",
+        "value": "",
+        "row": "7",
+        "type": "input"
+      },
+      "label_title_font": {
+        "description": "Font",
+        "value": "Roboto, sans-serif",
+        "row": "7",
+        "type": "input"
+      },
+      "label_title_size": {
+        "description": "Size",
+        "value": "12",
+        "row": "7",
+        "type": "input"
+      },
+      "label_title_color": {
+        "description": "Color",
+        "value": "#31333F",
+        "row": "7",
+        "type": "input"
+      },
+      "x_tickfont": {
+        "description": "X tick font",
+        "value": "Roboto, sans-serif",
+        "row": "8",
+        "type": "input"
+      },
+      "x_tickfontsize": {
+        "description": "Font size",
+        "value": "12",
+        "row": "8",
+        "type": "input"
+      },
+      "x_tick_angle": {
+        "description": "Tick angle",
+        "value": [-90, 45, 90, 5],
+        "row": "8",
+        "type": "slide"
+      },
+      "y_tickfont": {
+        "description": "Y tick font",
+        "value": "Roboto, sans-serif",
+        "row": "9",
+        "type": "input"
+      },
+      "y_tickfontsize": {
+        "description": "Font size",
+        "value": "12",
+        "row": "9",
+        "type": "input"
+      },
+      "y_tick_angle": {
+        "description": "Tick angle",
+        "value": [-90, 0, 90, 5],
+        "row": "9",
+        "type": "slide"
+      },
+      "cbar_tickfont": {
+        "description": "Cbar tick font",
+        "value": "Roboto, sans-serif",
+        "row": "10",
+        "type": "input"
+      },
+      "cbar_tickfontsize": {
+        "description": "Font size",
+        "value": "10",
+        "row": "10",
+        "type": "input"
+      },
+      "cbar_outlinewidth": {
+        "description": "Outline width",
+        "value": "0",
+        "row": "10",
+        "type": "input"
+      },
+      "cbar_right": {
+        "description": "Cbar right",
+        "value": "50",
+        "row": "11",
+        "type": "input"
+      },
+      "cbar_width": {
+        "description": "Cbar width",
+        "value": "20",
+        "row": "11",
+        "type": "input"
+      },
+      "cbar_height": {
+        "description": "Cbar height",
+        "value": "0.5",
+        "row": "11",
+        "type": "input"
+      },
+      "label_height": {
+        "description": "Label height",
+        "value": "0.01",
+        "row": "12",
+        "type": "input"
+      },
+      "label_spacing": {
+        "description": "Label spacing",
+        "value": "0.02",
+        "row": "12",
+        "type": "input"
+      },
+      "code_custom": {
+        "description": "*Custom codes (For developers)",
+        "value": "",
+        "row": "13",
+        "type": "input"
+      },
+      "color_picker": {
+        "description": "Color picker",
+        "value": "#31333F",
+        "row": "14",
+        "type": "cpicker"
+      }
+    }
+  },
+  "Bar Plot": {
+    "simple": {
+      "scale": {
+        "description": "Scale",
+        "value": ["Standard", "Min Max"],
+        "row": "1",
+        "type": "select"
+      },
+      "bar_gap": {
+        "description": "Bar gap",
+        "value": "0.5",
+        "row": "1",
+        "type": "input"
+      },
+      "bar_opacity": {
+        "description": "Bar opacity",
+        "value": "0.6",
+        "row": "1",
+        "type": "input"
+      },
+      "bar_outline_width": {
+        "description": "Bar outline width",
+        "value": "1.5",
+        "row": "1",
+        "type": "input"
+      }
+    },
+    "advanced": {
+      "bar_outline": {
+        "description": "Bar outline",
+        "value": "#08306B",
+        "row": "1",
+        "type": "input"
+      },
+      "title": {
+        "description": "Title",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "x_label": {
+        "description": "X label",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "y_label": {
+        "description": "Y label",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "x_axis": {
+        "description": "X axis",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "y_axis": {
+        "description": "Y axis",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "x_grid_color": {
+        "description": "X grid",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "y_grid_color": {
+        "description": "Y grid",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "x_tick_color": {
+        "description": "X tick",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "y_tick_color": {
+        "description": "Y tick",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "x_ticktext_color": {
+        "description": "X ticktext",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "y_ticktext_color": {
+        "description": "Y ticktext",
+        "value": "#31333F",
+        "row": "1",
+        "type": "input"
+      },
+      "plot_bg": {
+        "description": "Plot bg",
+        "value": "#FFFFFF",
+        "row": "1",
+        "type": "cpicker"
+      },
+      "example_color": {
+        "description": "Example",
+        "value": "#9ecae1",
+        "row": "1",
+        "type": "cpicker"
+      },
+      "x_grid": {
+        "description": "Show x grid",
+        "value": "True",
+        "row": "1",
+        "type": "check"
+      },
+      "y_grid": {
+        "description": "Show y grid",
+        "value": "True",
+        "row": "1",
+        "type": "check"
+      }
+    }
+  },
+  "ROC": {}
 }

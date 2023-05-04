@@ -1,3 +1,4 @@
+from cProfile import label
 from multiprocessing import Pool, cpu_count
 
 import altair as alt
@@ -264,15 +265,65 @@ def scatter_plot(data):
 
 
 # - Bar chart:
-def bar_chart(data):
-    chart = (
-        alt.Chart(data)
-        .mark_bar()
-        .encode(x="A1BG", y="count()", color="binary_disease state")
-        .interactive()
+def bar_chart(input_paras, df_z, df_label, patient_id):
+    # st.write(df_z.T)
+    # st.write(df_label.T)
+    df = df_z.T.merge(df_label.T, right_index=True, left_index=True)
+
+    fig = go.Figure(
+        px.histogram(
+            df,
+            y="A1BG",
+            labels={"A1BG": "Expression"},
+            x="icu",
+            color="icu",
+        )
+    )
+    fig.update_traces(
+        marker_color="rgb(158, 202, 225)",
+        marker_line_color="rgb(8, 48, 107)",
+        marker_line_width=1.5,
+        opacity=0.6,
     )
 
-    st.write(chart)
+    fig.update_layout(
+        plot_bgcolor="white",
+        bargap=0.5,
+    )
+
+    fig.update_xaxes(
+        type="category",
+        showgrid=True,
+        gridcolor="lightgray",
+        linewidth=2,
+        linecolor="#31333F",
+        ticks="outside",
+        tickwidth=1,
+        tickcolor="#31333F",
+        ticklen=2,
+        ticklabelstep=1,
+        tickangle=0,
+        tickfont=dict(family="Roboto, sans-serif", color="crimson", size=14),
+        mirror=True,
+    )
+
+    fig.update_yaxes(
+        showgrid=True,
+        gridcolor="lightgray",
+        linewidth=2,
+        linecolor="#31333F",
+        ticks="outside",
+        tickwidth=1,
+        tickcolor="#31333F",
+        ticklen=2,
+        ticklabelstep=1,
+        tickangle=0,
+        tickfont=dict(family="Roboto, sans-serif", color="crimson", size=14),
+        mirror=True,
+        range=[1.5, 4.5],
+    )
+
+    return fig
 
 
 def map_label_colors(label, label_color):
@@ -401,10 +452,10 @@ def heatmap_func(input_paras, df, df_label, patient_id):
     # Define the input parameters for the cluster map
     paras = input_paras
 
-    label_height = paras["label_layout"]["height"]
-    x_title = paras["xaxis"]["X-axis title"]
-    y_title = paras["yaxis"]["Y-axis title"]
-    cbar_title = paras["cbar_layout"]["Cbar title"]
+    label_height = paras["label_height"]
+    x_title = paras["x_title"]
+    y_title = paras["y_title"]
+    cbar_title = paras["cbar_title"]
 
     # Define cols and rows of figure
     num_rows = df_label.shape[0] + 1
@@ -415,21 +466,25 @@ def heatmap_func(input_paras, df, df_label, patient_id):
         cols=1,
         column_widths=[0.9],
         row_heights=row_heights,
-        vertical_spacing=paras["label_layout"]["spacing"],
+        vertical_spacing=paras["label_spacing"],
         shared_xaxes=True,
     )
 
     # Create a bar for labeling
-    new_name_lst = eval(paras["label_layout"]["Label title"])
-    for old_name, new_name in zip(list(df_label.index.values), new_name_lst):
-        df_label.rename(index={old_name: new_name}, inplace=True)
+    try:
+        new_name_lst = [x.strip() for x in paras["label_title"].split(",")]
+        for old_name, new_name in zip(list(df_label.index.values), new_name_lst):
+            df_label.rename(index={old_name: new_name}, inplace=True)
+    except:
+        pass
+
     for i, name in enumerate(reversed(df_label.index)):
         df_subset_label = df_label.loc[[name]]
         label_bar = go.Heatmap(
             z=df_subset_label,
             x=patient_id,
             y=df_subset_label.index,
-            colorscale=paras["para"]["Label pallete"],
+            colorscale=paras["label_pal"],
             showscale=False,
             hovertemplate=f"Label: %{{z}}<br>{x_title}: %{{x}}",
             name="",
@@ -441,27 +496,27 @@ def heatmap_func(input_paras, df, df_label, patient_id):
         z=df,
         x=patient_id,
         y=df.index,
-        colorscale=paras["para"]["Graph pallete"],
+        colorscale=paras["graph_pal"],
         hoverongaps=False,
         hovertemplate=f"{cbar_title}: %{{z}}<br>{y_title}: %{{y}}<br>{x_title}: %{{x}}",
-        zmid=paras["para"]["Mid point"],
+        zmid=paras["z_mid"],
         colorbar=dict(
-            thickness=paras["cbar_pos"]["Cbar width"],
-            len=paras["cbar_pos"]["Cbar height"],
+            thickness=paras["cbar_width"],
+            len=paras["cbar_height"],
             title=cbar_title,
             titlefont=dict(
-                family=paras["cbar_layout"]["Font"],
-                size=paras["cbar_layout"]["Size"],
-                color=paras["cbar_layout"]["color"],
+                family=paras["cbar_title_font"],
+                size=paras["cbar_title_size"],
+                color=paras["cbar_title_color"],
             ),
             tickfont=dict(
-                family=paras["cbar_layout"]["tickfont"],
-                size=paras["cbar_layout"]["tickfontsize"],
+                family=paras["cbar_tickfont"],
+                size=paras["cbar_tickfontsize"],
             ),
-            xpad=paras["cbar_pos"][
-                "Cbar right"
+            xpad=paras[
+                "cbar_right"
             ],  # increase gap between heatmap and colorbar horizontally
-            outlinewidth=paras["cbar_pos"]["outlinewidth"],
+            outlinewidth=paras["cbar_outlinewidth"],
         ),
         name="",
     )
@@ -472,42 +527,42 @@ def heatmap_func(input_paras, df, df_label, patient_id):
 
     # # Update figure layout
     fig.update_layout(
-        title=paras["plot_layout"]["Plot title"],
+        title=paras["plot_title"],
         autosize=True,
         margin=dict(t=100, b=20, l=10, r=10),
-        height=paras["plot_layout"]["Fig height"],
-        width=paras["plot_layout"]["Fig width"],
+        height=paras["fig_height"],
+        width=paras["fig_width"],
     )
 
     # Main xaxis layout
     fig.layout[f"xaxis{num_rows}"].update(
         title=x_title,
         titlefont=dict(
-            family=paras["xaxis"]["Font"],
-            size=paras["xaxis"]["Size"],
-            color=paras["xaxis"]["color"],
+            family=paras["x_title_font"],
+            size=paras["x_title_size"],
+            color=paras["x_title_color"],
         ),
         tickfont=dict(
-            family=paras["xaxis"]["tickfont"],
-            size=paras["xaxis"]["tickfontsize"],
+            family=paras["x_tickfont"],
+            size=paras["x_tickfontsize"],
         ),
-        tickangle=paras["tick_angle"]["X-axis tick angle"],
+        tickangle=paras["x_tick_angle"],
     )
 
     # Main yaxis layout
     fig.layout[f"yaxis{num_rows}"].update(
         title=y_title,
         titlefont=dict(
-            family=paras["yaxis"]["Font"],
-            size=paras["yaxis"]["Size"],
-            color=paras["yaxis"]["color"],
+            family=paras["y_title_font"],
+            size=paras["y_title_size"],
+            color=paras["y_title_color"],
         ),
         tickfont=dict(
-            family=paras["yaxis"]["tickfont"],
-            size=paras["yaxis"]["tickfontsize"],
+            family=paras["y_tickfont"],
+            size=paras["y_tickfontsize"],
         ),
         autorange="reversed",
-        tickangle=paras["tick_angle"]["Y-axis tick angle"],
+        tickangle=paras["y_tick_angle"],
     )
 
     # Label y axes layout
@@ -515,11 +570,11 @@ def heatmap_func(input_paras, df, df_label, patient_id):
     for yaxis in label_yaxes:
         yaxis.update(
             tickfont=dict(
-                family=paras["label_layout"]["Font"],
-                size=paras["label_layout"]["Size"],
-                color=paras["label_layout"]["color"],
+                family=paras["label_title_font"],
+                size=paras["label_title_size"],
+                color=paras["label_title_color"],
             ),
-            tickangle=paras["tick_angle"]["Y-axis tick angle"],
+            tickangle=paras["y_tick_angle"],
         )
-    custom_code(paras["custom"]["*Custom codes (For developers)"])
+    custom_code(paras["code_custom"])
     return fig

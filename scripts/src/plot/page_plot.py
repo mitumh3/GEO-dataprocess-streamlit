@@ -5,6 +5,7 @@ from streamlit import session_state as cache
 
 from .data_utils import PlotData
 from .plot_helper import Graph, display_run_type, disply_save_button, draw_graph
+from .plotting import bar_chart
 
 st.set_option("deprecation.showPyplotGlobalUse", False)
 
@@ -134,24 +135,16 @@ def layout():
         # Load paras
         st.subheader("Set parameters:")
 
-        # Create form
-        with st.form("graph_para"):
-            graph.display_para("simple")
-
-            with st.expander("Advanced settings"):
-                graph.display_para("advanced")
-            submit_button = st.form_submit_button("Submit", type="primary")
-
-        if submit_button:
-            # Load input parameters
-            input_dict = graph.load_input_and_data(data)
+        graph.display_para_options(data)
 
         if "input" not in cache:
             st.stop()
 
-        with st.spinner("Drawing dendrogram..."):
-            if cache.input["parameters"]["para"]["Dendrogram"]:
-                with st.expander("***Dendrogram:***", expanded=True):
+        if cache.graph_opt != "Heatmap":
+            pass
+        elif cache.input["parameters"]["dendrogram"]:
+            with st.expander("***Dendrogram:***", expanded=True):
+                with st.spinner("Drawing dendrogram..."):
                     st.pyplot(cache.dendrogram)
 
         with st.expander("***Result:***", expanded=True):
