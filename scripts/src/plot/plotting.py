@@ -269,7 +269,7 @@ def bar_chart(input_paras, df_z, df_label, patient_id):
     # st.write(df_z.T)
     # st.write(df_label.T)
     df = df_z.T.merge(df_label.T, right_index=True, left_index=True)
-
+    st.write(df)
     fig = go.Figure(
         px.histogram(
             df,
@@ -320,7 +320,7 @@ def bar_chart(input_paras, df_z, df_label, patient_id):
         tickangle=0,
         tickfont=dict(family="Roboto, sans-serif", color="crimson", size=14),
         mirror=True,
-        range=[1.5, 4.5],
+        # range=[1.5, 4.5],
     )
 
     return fig

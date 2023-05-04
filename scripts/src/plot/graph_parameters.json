@@ -554,100 +554,100 @@
       }
     },
     "advanced": {
-      "bar_outline": {
-        "description": "Bar outline",
+      "bar_outline_color": {
+        "description": "Bar outline color",
         "value": "#08306B",
         "row": "1",
         "type": "input"
       },
-      "title": {
-        "description": "Title",
+      "title_color": {
+        "description": "Title color",
         "value": "#31333F",
         "row": "1",
         "type": "input"
       },
-      "x_label": {
-        "description": "X label",
+      "x_label_color": {
+        "description": "X label color",
         "value": "#31333F",
         "row": "1",
         "type": "input"
       },
-      "y_label": {
-        "description": "Y label",
+      "y_label_color": {
+        "description": "Y label color",
         "value": "#31333F",
         "row": "1",
         "type": "input"
       },
-      "x_axis": {
-        "description": "X axis",
+      "x_color": {
+        "description": "X axis color",
         "value": "#31333F",
-        "row": "1",
+        "row": "2",
         "type": "input"
       },
-      "y_axis": {
-        "description": "Y axis",
+      "y_color": {
+        "description": "Y axis color",
         "value": "#31333F",
-        "row": "1",
+        "row": "2",
         "type": "input"
       },
       "x_grid_color": {
-        "description": "X grid",
+        "description": "X grid color",
         "value": "#31333F",
-        "row": "1",
+        "row": "2",
         "type": "input"
       },
       "y_grid_color": {
-        "description": "Y grid",
+        "description": "Y grid color",
         "value": "#31333F",
-        "row": "1",
+        "row": "2",
         "type": "input"
       },
       "x_tick_color": {
-        "description": "X tick",
+        "description": "X tick color",
         "value": "#31333F",
-        "row": "1",
+        "row": "3",
         "type": "input"
       },
       "y_tick_color": {
         "description": "Y tick",
         "value": "#31333F",
-        "row": "1",
+        "row": "3",
         "type": "input"
       },
       "x_ticktext_color": {
         "description": "X ticktext",
         "value": "#31333F",
-        "row": "1",
+        "row": "3",
         "type": "input"
       },
       "y_ticktext_color": {
         "description": "Y ticktext",
         "value": "#31333F",
-        "row": "1",
+        "row": "3",
         "type": "input"
       },
       "plot_bg": {
         "description": "Plot bg",
         "value": "#FFFFFF",
-        "row": "1",
+        "row": "4",
         "type": "cpicker"
       },
       "example_color": {
-        "description": "Example",
+        "description": "Example cpicker",
         "value": "#9ecae1",
-        "row": "1",
+        "row": "4",
         "type": "cpicker"
       },
       "x_grid": {
         "description": "Show x grid",
         "value": "True",
-        "row": "1",
+        "row": "5",
         "type": "check"
       },
       "y_grid": {
         "description": "Show y grid",
         "value": "True",
-        "row": "1",
+        "row": "5",
         "type": "check"
       }
     }

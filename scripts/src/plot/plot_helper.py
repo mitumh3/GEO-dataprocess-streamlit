@@ -313,6 +313,7 @@ def draw_graph(_df_z, input_dict):
         # Display plot
         st.plotly_chart(fig, use_container_width=True, theme=None)
     elif cache.graph_opt == "Bar Plot":
+        # st.write(input_dict)
         fig = bar_chart(
             input_dict["parameters"], _df_z, input_dict["df_label"], input_dict["id"]
         )
