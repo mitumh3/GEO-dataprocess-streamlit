@@ -71,9 +71,20 @@ async def process(url1, file_name, file_prefix, loop):
         filepath = f"{DATASET_PATH}/{file_name}"
         # Download files
         await loop.run_in_executor(None, download_file, url, filepath)
+
+        # Determine delimiter
+        if ".txt" in file_name or ".tsv" in file_name:
+            delimiter = "\t"
+        elif ".csv" in file_name:
+            delimiter = ","
+        elif ".psv" in file_name:
+            delimiter = "|"
+        elif ".ssv" in file_name:
+            delimiter = ";"
+
         # Determine the largest number of columns
         with gzip.open(filepath, "rt") as f:
-            reader = csv.reader(f, delimiter="\t")
+            reader = csv.reader(f, delimiter=delimiter)
             largest_column_count = max(len(row) for row in reader)
 
         # Create a list of column names
@@ -86,7 +97,7 @@ async def process(url1, file_name, file_prefix, loop):
             header=None,
             keep_default_na=True,
             skip_blank_lines=False,
-            delimiter="\t",
+            delimiter=delimiter,
             quotechar='"',
             on_bad_lines="skip",
             names=column_names,
