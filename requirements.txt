@@ -57,3 +57,4 @@ scikit-learn
 fastcluster
 statsmodels
 kaleido
+plotly

@@ -277,13 +277,15 @@ def bar_chart(input_paras, df_z, df_label, patient_id):
             labels={"A1BG": "Expression"},
             x="icu",
             color="icu",
+            barmode="overlay"
+            # histfunc="avg",
         )
     )
     fig.update_traces(
-        marker_color="rgb(158, 202, 225)",
-        marker_line_color="rgb(8, 48, 107)",
-        marker_line_width=1.5,
-        opacity=0.6,
+        # marker_color="rgb(158, 202, 225)",    # fill color
+        # marker_line_color="rgb(8, 48, 107)",  # outliner of fill
+        # marker_line_width=1.5,  # outliner of fill
+        # opacity=1,  # fill opacity
     )
 
     fig.update_layout(
